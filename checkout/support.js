@@ -11,7 +11,7 @@ function redeemSupportHtml(siteUrl) {
   const mail = escapeHtml(SUPPORT_EMAIL);
   return (
     `<p style="margin-top:1.25rem;padding-top:1rem;border-top:1px solid #ddd;color:#444;font-size:0.9rem">` +
-    `<strong>Didn&rsquo;t redeem in time, code expired, or code already used?</strong><br>` +
+    `<strong>Code already used or having trouble redeeming?</strong><br>` +
     `Email <a href="mailto:${mail}">${mail}</a> and include:` +
     `<ul style="margin:0.5rem 0 0 1.1rem;padding:0">` +
     `<li>A photo or screenshot of your <strong>PayPal payment receipt</strong> (or checkout confirmation)</li>` +
@@ -25,7 +25,7 @@ function redeemSupportHtml(siteUrl) {
 
 function redeemSupportText(siteUrl) {
   return (
-    `Didn't redeem in time, code expired, or code already used?\n` +
+    `Code already used or having trouble redeeming?\n` +
     `Email ${SUPPORT_EMAIL} with:\n` +
     `- A photo/screenshot of your PayPal payment receipt (or checkout confirmation)\n` +
     `- A screenshot of the error when you try to redeem on our site\n` +

@@ -4,8 +4,6 @@
 const nodemailer = require("nodemailer");
 const { Resend } = require("resend");
 const { SUPPORT_EMAIL, redeemSupportHtml, redeemSupportText } = require("./support");
-const { GIFT_CODE_TTL_DAYS } = require("./codes");
-
 let resendClient = null;
 
 function hasResend() {
@@ -73,10 +71,9 @@ function buildMessages({ code, productNames, redeemUrl, siteUrl }) {
   <p>Your redemption code:</p>
   <p style="font-size:1.25rem;font-weight:bold;letter-spacing:0.05em">${escapeHtml(code)}</p>
   <p><a href="${escapeHtml(redeemUrl)}">Redeem your code</a> — use the same Gmail you entered at checkout.</p>
-  <p style="color:#c00;font-size:0.9rem"><strong>This code expires in 48 hours.</strong> Redeem soon to download your games.</p>
   <p style="color:#666;font-size:0.9rem">Unzip downloads into <code>UsbGames\\PortableGames\\</code> on your USB.</p>
   ${redeemSupportHtml(siteUrl)}
-  <p style="color:#666;font-size:0.85rem;margin-top:1rem">Didn&rsquo;t get this email within 48 hours of paying? Email <a href="mailto:${escapeHtml(SUPPORT_EMAIL)}">${escapeHtml(SUPPORT_EMAIL)}</a> with your PayPal receipt.</p>
+  <p style="color:#666;font-size:0.85rem;margin-top:1rem">Didn&rsquo;t get this email? Email <a href="mailto:${escapeHtml(SUPPORT_EMAIL)}">${escapeHtml(SUPPORT_EMAIL)}</a> with your PayPal receipt.</p>
   <p style="color:#666;font-size:0.85rem"><a href="${escapeHtml(siteUrl)}">${escapeHtml(siteUrl)}</a></p>
 </body></html>`;
 
@@ -86,8 +83,6 @@ Your code: ${code}
 
 Redeem: ${redeemUrl}
 Use the same Gmail you used at checkout.
-
-This code expires in 48 hours.
 
 ${redeemSupportText(siteUrl)}
 
@@ -107,12 +102,9 @@ function buildGiftMessages({
   siteUrl,
   fromEmail,
   giftMessage,
-  giftExpiryDays,
 }) {
   const games =
     productNames && productNames.length ? productNames.join(", ") : "UsbGames";
-  const days = giftExpiryDays > 0 ? giftExpiryDays : 7;
-  const expiryLabel = days === 1 ? "1 day" : `${days} days`;
   const from = escapeHtml(fromEmail);
   const msgBlock = giftMessage
     ? `<p style="background:#f4f8f7;border-left:4px solid #64e0d0;padding:0.75rem 1rem;margin:1rem 0">` +
@@ -132,7 +124,6 @@ function buildGiftMessages({
   <p style="font-size:1.25rem;font-weight:bold;letter-spacing:0.05em">${escapeHtml(code)}</p>
   <p style="color:#555;font-size:0.9rem">Gift codes start with <strong>USB-G</strong> (e.g. USB-GXXXX-XXXX).</p>
   <p><a href="${escapeHtml(redeemUrl)}">Redeem your gift</a> — use the <strong>same email this message was sent to</strong> (not ${from}&rsquo;s).</p>
-  <p style="color:#c00;font-size:0.9rem"><strong>This gift code expires in ${expiryLabel}.</strong> Redeem soon to download your games.</p>
   <p style="color:#666;font-size:0.9rem">Unzip downloads into <code>UsbGames\\PortableGames\\</code> on your USB.</p>
   ${redeemSupportHtml(siteUrl)}
   <p style="color:#666;font-size:0.85rem"><a href="${escapeHtml(siteUrl)}">${escapeHtml(siteUrl)}</a></p>
@@ -149,8 +140,6 @@ Your gift code: ${code}
 
 Redeem: ${redeemUrl}
 Use the email address this message was sent to (not the giver's email).
-
-This gift code expires in ${expiryLabel}.
 
 ${redeemSupportText(siteUrl)}
 
@@ -209,7 +198,6 @@ async function sendRedeemCode({
           siteUrl,
           fromEmail: giftFromEmail,
           giftMessage: giftMessage || "",
-          giftExpiryDays: GIFT_CODE_TTL_DAYS,
         })
       : buildMessages({ code, productNames, redeemUrl, siteUrl });
 

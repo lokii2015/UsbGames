@@ -1,7 +1,7 @@
 /**
  * Redemption codes — created only after payment.
- * Regular: USB-XXXX-XXXX (48h default)
- * Gift:    USB-GXXX-XXXX (days — see GIFT_CODE_TTL_DAYS)
+ * Regular: USB-XXXX-XXXX
+ * Gift:    USB-GXXX-XXXX
  */
 const crypto = require("crypto");
 const fs = require("fs");
@@ -11,14 +11,6 @@ const { SUPPORT_EMAIL } = require("./support");
 
 const DATA_DIR = path.join(__dirname, "data");
 const CODES_FILE = path.join(DATA_DIR, "codes.json");
-const CODE_TTL_MS =
-  (Number(process.env.CODE_TTL_HOURS) > 0 ? Number(process.env.CODE_TTL_HOURS) : 48) *
-  60 *
-  60 *
-  1000;
-const GIFT_CODE_TTL_DAYS =
-  Number(process.env.GIFT_CODE_TTL_DAYS) > 0 ? Number(process.env.GIFT_CODE_TTL_DAYS) : 7;
-const GIFT_CODE_TTL_MS = GIFT_CODE_TTL_DAYS * 24 * 60 * 60 * 1000;
 const GIFT_CODE_RE = /^USB-G[A-Z0-9]{4}-[A-Z0-9]{4}$/;
 const STANDARD_CODE_RE = /^USB-(?!G[A-Z0-9]{3}-)[A-Z0-9]{4}-[A-Z0-9]{4}$/;
 
@@ -54,7 +46,7 @@ function generateCode() {
   return `USB-${a}-${b}`;
 }
 
-/** Gift codes: USB-GXXXX-XXXX — the G marks it as a gift */
+/** Gift codes: USB-GXXXX-XXXX */
 function generateGiftCode() {
   const a = crypto.randomBytes(2).toString("hex").toUpperCase();
   const b = crypto.randomBytes(2).toString("hex").toUpperCase();
@@ -70,37 +62,14 @@ function isValidCodeFormat(code) {
   return GIFT_CODE_RE.test(c) || STANDARD_CODE_RE.test(c);
 }
 
-function ttlMsForRow(row) {
-  if (row?.isGift) return GIFT_CODE_TTL_MS;
-  return CODE_TTL_MS;
-}
-
-function expiryLabelForRow(row) {
-  if (row?.isGift) {
-    const days = GIFT_CODE_TTL_DAYS;
-    return days === 1 ? "1 day" : `${days} days`;
-  }
-  const hours = Math.round(CODE_TTL_MS / (60 * 60 * 1000));
-  return hours === 1 ? "1 hour" : `${hours} hours`;
-}
-
-function expiresAtForRow(row) {
-  if (row.expiresAt) return new Date(row.expiresAt).getTime();
-  const created = row.createdAt ? new Date(row.createdAt).getTime() : 0;
-  return created + ttlMsForRow(row);
-}
-
-function isExpired(row) {
-  if (!row) return true;
-  if (row.used) return false;
-  return Date.now() > expiresAtForRow(row);
+function isExpired() {
+  return false;
 }
 
 function findByOrderId(orderId) {
   const codes = load();
   const hit = Object.entries(codes).find(([, row]) => row.paypalOrderId === orderId);
   if (!hit) return null;
-  if (isExpired(hit[1])) return null;
   return hit;
 }
 
@@ -116,18 +85,13 @@ function createForOrder({ orderId, productIds, email, isGift }) {
     code = gift ? generateGiftCode() : generateCode();
   } while (codes[code]);
 
-  const createdAt = new Date();
-  const ttl = gift ? GIFT_CODE_TTL_MS : CODE_TTL_MS;
-  const expiresAt = new Date(createdAt.getTime() + ttl);
-
   const row = {
     productIds: [...productIds],
     email: String(email).trim().toLowerCase(),
     paypalOrderId: orderId,
     used: false,
     isGift: gift,
-    createdAt: createdAt.toISOString(),
-    expiresAt: expiresAt.toISOString(),
+    createdAt: new Date().toISOString(),
   };
   codes[code] = row;
   save(codes);
@@ -155,14 +119,6 @@ function redeem(codeRaw, emailRaw) {
   const row = codes[code];
   if (!row) return { ok: false, error: "Invalid code." };
   if (row.used) return { ok: false, error: "This code was already used." };
-  if (isExpired(row)) {
-    const label = expiryLabelForRow(row);
-    return {
-      ok: false,
-      error: `This code expired (valid for ${label} after purchase). See support and email ${SUPPORT_EMAIL} with your PayPal receipt.`,
-      expired: true,
-    };
-  }
   if (row.email !== email) {
     return {
       ok: false,
@@ -188,8 +144,4 @@ module.exports = {
   redeem,
   load,
   isExpired,
-  expiryLabelForRow,
-  CODE_TTL_MS,
-  GIFT_CODE_TTL_DAYS,
-  GIFT_CODE_TTL_MS,
 };
