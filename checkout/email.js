@@ -80,11 +80,12 @@ function transporter() {
 }
 
 function finalizeEmail(siteUrl, innerHtml, subject, text) {
-  const useCid = brand.hasInlineLogo();
-  const attachments = useCid ? [brand.inlineLogoAttachment()].filter(Boolean) : [];
+  const attachments = brand.hasInlineLogo()
+    ? [brand.inlineLogoAttachment(siteUrl)].filter(Boolean)
+    : [];
   return {
     subject,
-    html: brand.wrapEmailBody(siteUrl, innerHtml, useCid),
+    html: brand.wrapEmailBody(siteUrl, innerHtml),
     text,
     attachments,
   };
@@ -182,11 +183,16 @@ async function sendViaResend(to, messages) {
     text: messages.text,
   };
   if (messages.attachments?.length) {
-    payload.attachments = messages.attachments.map((a) => ({
-      filename: a.filename,
-      content: a.content,
-      content_id: a.contentId,
-    }));
+    payload.attachments = messages.attachments.map((a) => {
+      const att = {
+        filename: a.filename,
+        contentId: a.contentId,
+      };
+      if (a.path) att.path = a.path;
+      if (a.content) att.content = a.content;
+      if (a.contentType) att.contentType = a.contentType;
+      return att;
+    });
   }
   const { data, error } = await getResend().emails.send(payload);
 

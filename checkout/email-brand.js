@@ -19,13 +19,12 @@ function escapeHtml(s) {
     .replace(/"/g, "&quot;");
 }
 
-function logoSrc(siteUrl, useCid) {
-  if (useCid) return `cid:${LOGO_CID}`;
+function logoUrl(siteUrl) {
   return `${publicSiteUrl(siteUrl)}/email-assets/brand.png`;
 }
 
-function emailHeaderHtml(siteUrl, useCid) {
-  const src = logoSrc(siteUrl, useCid);
+function emailHeaderHtml(siteUrl) {
+  const src = logoUrl(siteUrl);
   return (
     `<table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="margin:0 0 24px;border-collapse:collapse">` +
     `<tr><td align="center" style="background:${BRAND_RED};padding:20px 24px">` +
@@ -43,7 +42,7 @@ function emailFooterHtml(siteUrl) {
   );
 }
 
-function wrapEmailBody(siteUrl, innerHtml, useCid) {
+function wrapEmailBody(siteUrl, innerHtml) {
   return (
     `<!DOCTYPE html>` +
     `<html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"></head>` +
@@ -53,7 +52,7 @@ function wrapEmailBody(siteUrl, innerHtml, useCid) {
     `<table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" ` +
     `style="max-width:560px;background:#ffffff;border-radius:8px;overflow:hidden">` +
     `<tr><td style="padding:0">` +
-    emailHeaderHtml(siteUrl, useCid) +
+    emailHeaderHtml(siteUrl) +
     `<div style="padding:8px 28px 28px;font-family:Segoe UI,Helvetica,Arial,sans-serif;font-size:16px;line-height:1.55;color:#111">` +
     innerHtml +
     `</div>` +
@@ -66,18 +65,22 @@ function hasInlineLogo() {
   return fs.existsSync(LOGO_PNG);
 }
 
-function inlineLogoAttachment() {
+/** Resend inline embed (backup if some clients block remote images). */
+function inlineLogoAttachment(siteUrl) {
   if (!hasInlineLogo()) return null;
   return {
     filename: "brand.png",
     content: fs.readFileSync(LOGO_PNG).toString("base64"),
     contentId: LOGO_CID,
+    contentType: "image/png",
+    path: logoUrl(siteUrl),
   };
 }
 
 module.exports = {
   BRAND_RED,
   LOGO_CID,
+  logoUrl,
   emailHeaderHtml,
   wrapEmailBody,
   hasInlineLogo,
