@@ -4,6 +4,7 @@
 const nodemailer = require("nodemailer");
 const { Resend } = require("resend");
 const { SUPPORT_EMAIL, redeemSupportHtml, redeemSupportText } = require("./support");
+const { publicSiteUrl } = require("./site-url");
 let resendClient = null;
 
 function hasResend() {
@@ -189,17 +190,21 @@ async function sendRedeemCode({
   giftFromEmail,
   giftMessage,
 }) {
+  const site = publicSiteUrl(siteUrl);
+  const redeem = redeemUrl && !redeemUrl.includes("netlify.app")
+    ? redeemUrl
+    : `${site}/redeem.html`;
   const messages =
     giftFromEmail
       ? buildGiftMessages({
           code,
           productNames,
-          redeemUrl,
-          siteUrl,
+          redeemUrl: redeem,
+          siteUrl: site,
           fromEmail: giftFromEmail,
           giftMessage: giftMessage || "",
         })
-      : buildMessages({ code, productNames, redeemUrl, siteUrl });
+      : buildMessages({ code, productNames, redeemUrl: redeem, siteUrl: site });
 
   if (!isConfigured()) {
     console.log("\n📧 EMAIL NOT CONFIGURED — redemption code for", to);
@@ -225,14 +230,15 @@ function escapeHtml(s) {
 
 /** Test email — example code only, not a real redeem code. */
 async function sendTestEmail({ to, siteUrl }) {
+  const site = publicSiteUrl(siteUrl);
   const exampleCode = "USB-XXXX-XXXX";
   const target = normalizeTo(to || SUPPORT_EMAIL);
 
   const html = `<p>UsbGames bot test — if you see this, email works.</p>
 <p>Example code shape: <strong>${exampleCode}</strong> (not valid for redeem).</p>
-<p>After a real purchase, redeem at ${escapeHtml(siteUrl || "your site")}/redeem.html</p>`;
+<p>After a real purchase, redeem at ${escapeHtml(site)}/redeem.html</p>`;
 
-  const text = `UsbGames bot test. Example code: ${exampleCode} (not valid). Redeem page: ${siteUrl}/redeem.html`;
+  const text = `UsbGames bot test. Example code: ${exampleCode} (not valid). Redeem page: ${site}/redeem.html`;
 
   if (!isConfigured()) {
     console.log("\n📧 TEST — set RESEND_API_KEY in checkout/.env\n");
@@ -275,9 +281,14 @@ This link expires in about ${expiresHours} hours.
 }
 
 async function sendPurchaseHistoryLink({ to, historyUrl, siteUrl, expiresHours }) {
+  const site = publicSiteUrl(siteUrl);
+  const history =
+    historyUrl && !historyUrl.includes("netlify.app")
+      ? historyUrl
+      : `${site}/purchase-history.html`;
   const messages = buildPurchaseHistoryMessages({
-    historyUrl,
-    siteUrl,
+    historyUrl: history,
+    siteUrl: site,
     expiresHours: expiresHours || 2,
   });
 

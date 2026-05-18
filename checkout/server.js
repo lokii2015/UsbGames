@@ -20,12 +20,10 @@ const bot = require("./paypal-bot");
 const mail = require("./email");
 const { createWebhookHandler } = require("./paypal-webhook");
 const { SUPPORT_EMAIL } = require("./support");
+const { getSiteUrl, publicSiteUrl, CANONICAL_SITE_URL } = require("./site-url");
 
 const PORT = Number(process.env.PORT) || 4242;
-const SITE_URL = (process.env.SITE_URL || `http://localhost:${PORT}`).replace(
-  /\/$/,
-  ""
-);
+const SITE_URL = getSiteUrl(PORT);
 const WEB_ROOT = path.join(__dirname, "..");
 const PREMIUM_DIR = path.join(__dirname, "downloads");
 const DATA_DIR = path.join(__dirname, "data");
@@ -193,7 +191,7 @@ app.get("/api/product/:productId", (req, res) => {
   });
 });
 
-/** Prefer SITE_URL from .env; allow localhost origin for dev only. */
+/** Prefer canonical SITE_URL; allow localhost origin for dev only. */
 function resolveSiteUrl(body) {
   const raw = body?.siteUrl || body?.returnOrigin;
   if (raw && typeof raw === "string") {
@@ -201,17 +199,13 @@ function resolveSiteUrl(body) {
       const u = new URL(raw.trim());
       if (u.protocol === "http:" || u.protocol === "https:") {
         const host = u.hostname.toLowerCase();
-        if (host.endsWith(".netlify.app")) return SITE_URL;
         if (host === "localhost" || host === "127.0.0.1") return u.origin;
-        if (host.endsWith(".onrender.com") && SITE_URL.includes(".onrender.com")) {
-          return u.origin;
-        }
       }
     } catch {
       /* ignore */
     }
   }
-  return SITE_URL;
+  return publicSiteUrl(null, SITE_URL);
 }
 
 function parseCheckoutEmails(body) {
@@ -684,6 +678,14 @@ app.use(express.static(WEB_ROOT));
 
 app.listen(PORT, () => {
   console.log(`UsbGames checkout: ${SITE_URL}`);
+  if (
+    process.env.SITE_URL &&
+    String(process.env.SITE_URL).toLowerCase().includes("netlify")
+  ) {
+    console.warn(
+      `⚠ SITE_URL in env points to Netlify — emails/links use ${CANONICAL_SITE_URL} instead. Update Render env SITE_URL.`
+    );
+  }
   console.log(`Open FAQ: ${SITE_URL}/faq.html`);
   if (process.env.FAQ_ADMIN_CODE) {
     console.log("FAQ admin code: loaded from checkout/.env");
