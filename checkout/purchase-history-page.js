@@ -186,6 +186,42 @@
     }
   });
 
+  const gcForm = document.getElementById("giftcard-balance-form");
+  const gcResult = document.getElementById("giftcard-balance-result");
+  const gcErr = document.getElementById("giftcard-balance-error");
+
+  if (gcForm) {
+    gcForm.addEventListener("submit", async (e) => {
+      e.preventDefault();
+      if (gcResult) gcResult.hidden = true;
+      if (gcErr) gcErr.hidden = true;
+      const code = document.getElementById("giftcard-balance-code")?.value.trim();
+      try {
+        const res = await fetch(apiUrl("/api/gift-card/balance"), {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ code }),
+        });
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.error || "Invalid gift card");
+        if (gcResult) {
+          gcResult.hidden = false;
+          gcResult.innerHTML =
+            "Remaining: <strong>" +
+            escapeHtml(data.balanceLabel) +
+            "</strong> (started at " +
+            escapeHtml(data.initialLabel) +
+            ")";
+        }
+      } catch (err) {
+        if (gcErr) {
+          gcErr.hidden = false;
+          gcErr.textContent = err.message;
+        }
+      }
+    });
+  }
+
   if (token) {
     loadHistory();
   }

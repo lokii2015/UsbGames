@@ -21,6 +21,8 @@ const mail = require("./email");
 const { createWebhookHandler } = require("./paypal-webhook");
 const { SUPPORT_EMAIL } = require("./support");
 const { getSiteUrl, publicSiteUrl, CANONICAL_SITE_URL } = require("./site-url");
+const giftCards = require("./gift-cards");
+const { createGiftCardRouter } = require("./gift-card-routes");
 
 const PORT = Number(process.env.PORT) || 4242;
 const SITE_URL = getSiteUrl(PORT);
@@ -109,6 +111,8 @@ app.use(
     sendAccessEmail: (opts) => mail.sendPurchaseHistoryLink(opts),
   })
 );
+
+app.use("/api/gift-card", createGiftCardRouter({ parseCartBody }));
 
 app.get("/api/health", (_req, res) => {
   res.json({
@@ -209,7 +213,34 @@ function resolveSiteUrl(body) {
   return publicSiteUrl(null, SITE_URL);
 }
 
+function parseGiftCardQuote(body, cart) {
+  const code = giftCards.normalizeCode(body?.giftCardCode);
+  if (!code) return { giftCard: null };
+  const quote = giftCards.quoteForCart(code, cart.amount);
+  if (!quote.ok) return { error: quote.error };
+  return {
+    giftCard: {
+      code: quote.code,
+      appliedCents: quote.appliedCents,
+      remainderCents: quote.remainderCents,
+      balanceAfterCents: quote.balanceAfterCents,
+    },
+  };
+}
+
 function parseCheckoutEmails(body) {
+  const mode = String(body?.checkoutMode || "").toLowerCase();
+  if (mode === "giftcard") {
+    const email = bot.normalizeEmail(body?.email);
+    if (!email) return { error: "Enter your email before checkout." };
+    return {
+      isGift: false,
+      isGiftCard: true,
+      email,
+      buyerEmail: null,
+      giftMessage: "",
+    };
+  }
   const isGift =
     body?.checkoutMode === "gift" || body?.gift === true || body?.isGift === true;
   if (isGift) {
@@ -321,6 +352,53 @@ app.post("/api/paypal/me-url", (req, res) => {
   });
 });
 
+/** Pay with gift card only (covers full cart) */
+app.post("/api/checkout/gift-card-order", async (req, res) => {
+  if (!signingSecret) {
+    return res.status(503).json({ error: "DOWNLOAD_SIGNING_SECRET not set in checkout/.env" });
+  }
+  const cart = parseCartBody(req.body);
+  if (!cart) return res.status(400).json({ error: "Cart is empty or invalid" });
+  if (cart.amount < 1) {
+    return res.status(400).json({ error: "Cart total must be at least $0.01." });
+  }
+
+  const checkout = parseCheckoutEmails(req.body);
+  if (checkout.error) return res.status(400).json({ error: checkout.error });
+
+  const gc = parseGiftCardQuote(req.body, cart);
+  if (gc.error) return res.status(400).json({ error: gc.error });
+  if (!gc.giftCard || gc.giftCard.remainderCents > 0) {
+    return res.status(400).json({
+      error: "Gift card does not cover the full total. Pay the remainder with PayPal.",
+    });
+  }
+
+  try {
+    const orderId = `gc_${crypto.randomBytes(16).toString("hex")}`;
+    const deduct = giftCards.deduct(gc.giftCard.code, gc.giftCard.appliedCents, orderId);
+    if (!deduct.ok) return res.status(400).json({ error: deduct.error });
+
+    const result = await bot.fulfillPaidOrder({
+      orderId,
+      productIds: cart.productIds,
+      email: checkout.email,
+      siteUrl: SITE_URL,
+    });
+
+    res.json({
+      orderId,
+      code: result.code,
+      emailSent: result.emailSent,
+      giftCardUsed: deduct.usedCents,
+      giftCardBalanceLabel: deduct.balanceLabel,
+      completeUrl: `${SITE_URL}/order-complete.html?email=${encodeURIComponent(checkout.email)}`,
+    });
+  } catch (err) {
+    res.status(500).json({ error: err.message || "Gift card checkout failed" });
+  }
+});
+
 /** Create PayPal order for embedded buttons */
 app.post("/api/paypal/create-order", async (req, res) => {
   if (!paypal.isConfigured()) {
@@ -337,19 +415,33 @@ app.post("/api/paypal/create-order", async (req, res) => {
     return res.status(400).json({ error: checkout.error });
   }
 
+  const gc = parseGiftCardQuote(req.body, cart);
+  if (gc.error) return res.status(400).json({ error: gc.error });
+
+  const remainderCents = gc.giftCard ? gc.giftCard.remainderCents : cart.amount;
+  if (remainderCents < 1) {
+    return res.status(400).json({
+      error: "Cart is fully covered by gift card. Use Complete order with gift card.",
+    });
+  }
+
   try {
     const siteUrl = resolveSiteUrl(req.body);
-    const order = await paypal.createOrder(cart, siteUrl);
+    const order = await paypal.createOrder(cart, siteUrl, remainderCents);
     pending.set(order.id, {
       email: checkout.email,
       productIds: cart.productIds,
       isGift: checkout.isGift,
       buyerEmail: checkout.buyerEmail,
       giftMessage: checkout.giftMessage,
+      giftCardCode: gc.giftCard?.code || null,
+      giftCardAppliedCents: gc.giftCard?.appliedCents || 0,
     });
     res.json({
       orderId: order.id,
       approveUrl: paypal.approveUrlFromOrder(order),
+      giftCardAppliedCents: gc.giftCard?.appliedCents || 0,
+      remainderCents,
     });
   } catch (err) {
     console.error("PayPal create order:", err);
@@ -369,10 +461,20 @@ app.post("/api/paypal/capture-order", async (req, res) => {
     const captured = await paypal.captureOrder(orderId);
     const productIds = paypal.productIdsFromOrder(captured);
     let botResult = null;
+    const pend = pending.get(orderId);
+    if (pend?.giftCardCode && pend.giftCardAppliedCents > 0) {
+      const deduct = giftCards.deduct(
+        pend.giftCardCode,
+        pend.giftCardAppliedCents,
+        orderId
+      );
+      if (!deduct.ok) {
+        return res.status(400).json({ error: deduct.error });
+      }
+    }
     if (productIds.length && paypal.orderIsPaid(captured)) {
       botResult = await bot.fulfillFromPayPalOrderId(orderId, SITE_URL);
     }
-    const pend = pending.get(orderId);
     const recipientEmail =
       botResult?.email || pend?.email || paypal.payerEmail(captured);
     const completeEmail =

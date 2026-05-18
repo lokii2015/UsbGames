@@ -18,10 +18,15 @@
   const panelPaid = document.getElementById("panel-paid");
   const panelSelf = document.getElementById("panel-checkout-self");
   const panelGift = document.getElementById("panel-checkout-gift");
+  const panelGiftcard = document.getElementById("panel-checkout-giftcard");
+  const panelGiftcardPay = document.getElementById("panel-giftcard-pay");
+  const giftcardQuoteEl = document.getElementById("giftcard-quote");
+  const payNoteEl = document.getElementById("checkout-pay-note");
 
   let config = null;
   let paypalButtonsReady = false;
   let checkoutMode = "self";
+  let giftCardQuote = null;
 
   function showError(msg) {
     errorEl.hidden = false;
@@ -59,8 +64,55 @@
 
   function applyCheckoutModePanels() {
     const isGift = checkoutMode === "gift";
-    if (panelSelf) panelSelf.hidden = isGift;
+    const isGiftcard = checkoutMode === "giftcard";
+    if (panelSelf) panelSelf.hidden = isGift || isGiftcard;
     if (panelGift) panelGift.hidden = !isGift;
+    if (panelGiftcard) panelGiftcard.hidden = !isGiftcard;
+    if (isGiftcard) giftCardQuote = null;
+    updatePaymentPanels();
+  }
+
+  function getGiftcardCode() {
+    const el = document.getElementById("giftcard-code");
+    return el ? el.value.trim() : "";
+  }
+
+  function getGiftcardEmail() {
+    const el = document.getElementById("giftcard-checkout-email");
+    return el ? el.value.trim() : "";
+  }
+
+  function updatePaymentPanels() {
+    const lines = cart.getLines();
+    const total = cart.totalCents();
+    const isFree = total === 0;
+    const isGiftcardMode = checkoutMode === "giftcard";
+    const fullGiftcard =
+      isGiftcardMode &&
+      giftCardQuote &&
+      giftCardQuote.remainderCents === 0 &&
+      giftCardQuote.appliedCents > 0;
+
+    if (panelFree) panelFree.hidden = !isFree || isGiftcardMode;
+    if (panelGiftcardPay) panelGiftcardPay.hidden = !fullGiftcard;
+    if (panelPaid) panelPaid.hidden = isFree || fullGiftcard;
+
+    if (payNoteEl) {
+      if (fullGiftcard) {
+        payNoteEl.innerHTML =
+          "Gift card covers your order. Click <strong>Complete order with gift card</strong> below.";
+      } else if (isGiftcardMode && giftCardQuote && giftCardQuote.remainderCents > 0) {
+        payNoteEl.innerHTML =
+          "Pay <strong>" +
+          escapeHtml(giftCardQuote.remainderLabel) +
+          "</strong> with PayPal (gift card applied: " +
+          escapeHtml(giftCardQuote.appliedLabel) +
+          ").";
+      } else {
+        payNoteEl.innerHTML =
+          "All prices in <strong>CAD</strong>. Pay with PayPal or debit/credit card below.";
+      }
+    }
   }
 
   function setupCheckoutModeTabs() {
@@ -93,6 +145,14 @@
       siteUrl: checkoutSiteUrl(),
       checkoutMode,
     };
+    if (checkoutMode === "giftcard") {
+      const payload = {
+        ...base,
+        email: getGiftcardEmail(),
+      };
+      if (giftCardQuote?.code) payload.giftCardCode = giftCardQuote.code;
+      return payload;
+    }
     if (checkoutMode === "gift") {
       return {
         ...base,
@@ -110,6 +170,20 @@
   }
 
   function requireCheckoutEmails() {
+    if (checkoutMode === "giftcard") {
+      const email = getGiftcardEmail();
+      if (!isValidEmail(email)) {
+        showError("Enter your email before checkout.");
+        document.getElementById("giftcard-checkout-email")?.focus();
+        return false;
+      }
+      if (!giftCardQuote?.code) {
+        showError("Apply your gift card first.");
+        document.getElementById("giftcard-code")?.focus();
+        return false;
+      }
+      return true;
+    }
     if (checkoutMode === "gift") {
       const recipient = getGiftRecipientEmail();
       const buyer = getGiftBuyerEmail();
@@ -145,8 +219,7 @@
   }
 
   function applyPaymentPanels(isFree) {
-    if (panelFree) panelFree.hidden = !isFree;
-    if (panelPaid) panelPaid.hidden = isFree;
+    updatePaymentPanels();
   }
 
   function renderCart() {
@@ -258,6 +331,46 @@
         },
       };
     }
+  }
+
+  async function applyGiftCard() {
+    clearError();
+    const code = getGiftcardCode();
+    if (!code) {
+      showError("Enter your gift card code.");
+      return;
+    }
+    loadingEl.hidden = false;
+    const { ok, data } = await apiFetch("/api/gift-card/quote", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ code, items: cart.getIds() }),
+    });
+    loadingEl.hidden = true;
+    if (!ok) {
+      giftCardQuote = null;
+      if (giftcardQuoteEl) giftcardQuoteEl.hidden = true;
+      showError(data.error || "Could not apply gift card");
+      updatePaymentPanels();
+      if (paypalButtonsReady) location.reload();
+      return;
+    }
+    giftCardQuote = data;
+    if (giftcardQuoteEl) {
+      giftcardQuoteEl.hidden = false;
+      giftcardQuoteEl.innerHTML =
+        "Balance: <strong>" +
+        escapeHtml(data.balanceLabel) +
+        "</strong> · Applied: <strong>" +
+        escapeHtml(data.appliedLabel) +
+        "</strong> · Pay: <strong>" +
+        escapeHtml(data.remainderLabel) +
+        "</strong> · Left on card: <strong>" +
+        escapeHtml(data.balanceAfterLabel) +
+        "</strong>";
+    }
+    updatePaymentPanels();
+    if (paypalButtonsReady) location.reload();
   }
 
   async function createPayPalOrder() {
@@ -415,6 +528,27 @@
       } catch (_) {}
     });
   }
+
+  document.getElementById("btn-giftcard-apply")?.addEventListener("click", applyGiftCard);
+
+  document.getElementById("btn-giftcard-checkout")?.addEventListener("click", async () => {
+    if (!requireCheckoutEmails()) return;
+    clearError();
+    loadingEl.hidden = true;
+    const { ok, data } = await apiFetch("/api/checkout/gift-card-order", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(cartPayload()),
+    });
+    loadingEl.hidden = true;
+    if (!ok) {
+      showError(data.error || "Gift card checkout failed");
+      return;
+    }
+    cart.clear();
+    giftCardQuote = null;
+    location.href = data.completeUrl || "/order-complete.html";
+  });
 
   setupCheckoutModeTabs();
   cart.syncFromUrl();

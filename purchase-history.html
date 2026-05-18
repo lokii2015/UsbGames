@@ -75,6 +75,28 @@
         No orders found for this email. Try the exact address from your code email, your PayPal email, or sign in again with your redemption code above.
       </p>
 
+      <section class="card" id="giftcard-balance-section">
+        <h2 class="purchase-section-title">Gift card balance</h2>
+        <p class="purchase-hint">
+          Store credit codes look like <code>USB-Cxxx-xxxx-xxxx-x</code>. Use them at checkout, not on Redeem.
+        </p>
+        <form class="redeem-form" id="giftcard-balance-form">
+          <label class="checkout-field">
+            <span class="checkout-field-label">Gift card code</span>
+            <input
+              type="text"
+              id="giftcard-balance-code"
+              autocomplete="off"
+              spellcheck="false"
+              placeholder="USB-Cxxx-xxxx-xxxx-x"
+            />
+          </label>
+          <button type="submit" class="button button--secondary">Check balance</button>
+          <p id="giftcard-balance-result" class="checkout-panel-hint" hidden></p>
+          <p id="giftcard-balance-error" class="checkout-error" hidden></p>
+        </form>
+      </section>
+
       <p class="games-install-hint">
         Need help? <a href="support.html">Support</a> ·
         <a href="redeem.html">Redeem a code</a> ·

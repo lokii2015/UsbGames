@@ -15,6 +15,7 @@ const {
   rowLookupEmails,
   emailMatchesAny,
 } = require("./email-match");
+const giftCards = require("./gift-cards");
 const pending = require("./pending-orders");
 
 const DATA_DIR = path.join(__dirname, "data");
@@ -164,6 +165,14 @@ function redeem(codeRaw, emailRaw) {
     .toLowerCase();
   if (!code || !email) {
     return { ok: false, error: "Enter your email and redemption code." };
+  }
+
+  if (giftCards.isValidFormat(code)) {
+    return {
+      ok: false,
+      error:
+        "That is a gift card (USB-C…), not a game code. Use it at Checkout or check balance on the Orders page.",
+    };
   }
 
   if (!isValidCodeFormat(code)) {

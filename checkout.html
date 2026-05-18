@@ -73,6 +73,15 @@
             >
               Send as a gift
             </button>
+            <button
+              type="button"
+              class="checkout-tab"
+              data-checkout-mode="giftcard"
+              role="tab"
+              aria-selected="false"
+            >
+              Gift card
+            </button>
           </div>
 
           <div id="panel-checkout-self" class="checkout-panel" role="tabpanel">
@@ -121,7 +130,37 @@
               ></textarea>
             </label>
             <p class="checkout-panel-hint">
-              You pay; we email a <strong>gift code</strong> (<code>USB-GXXX-XXXX</code>) only to <strong>their</strong> address. The email will say it is a gift from you and ask them to say thank-you.
+              You pay; we email a <strong>gift code</strong> (<code>USB-GXXX-XXXX</code>) only to <strong>their</strong> address.
+            </p>
+          </div>
+
+          <div id="panel-checkout-giftcard" class="checkout-panel" role="tabpanel" hidden>
+            <label class="checkout-field">
+              <span class="checkout-field-label">Your email (for your game code)</span>
+              <input
+                type="email"
+                id="giftcard-checkout-email"
+                autocomplete="email"
+                placeholder="you@gmail.com"
+              />
+            </label>
+            <label class="checkout-field">
+              <span class="checkout-field-label">Gift card code</span>
+              <input
+                type="text"
+                id="giftcard-code"
+                autocomplete="off"
+                spellcheck="false"
+                placeholder="USB-Cxxx-xxxx-xxxx-x"
+              />
+            </label>
+            <button type="button" class="button button--secondary" id="btn-giftcard-apply">
+              Apply gift card
+            </button>
+            <p id="giftcard-quote" class="checkout-panel-hint" hidden></p>
+            <p class="checkout-panel-hint">
+              Store credit only — not for the Redeem page. Check balance on
+              <a href="purchase-history.html">Orders</a>.
             </p>
           </div>
 
@@ -131,7 +170,7 @@
           </p>
 
           <h2 class="checkout-summary-title">Payment</h2>
-          <p class="checkout-pay-note">
+          <p class="checkout-pay-note" id="checkout-pay-note">
             All prices in <strong>CAD</strong>. Pay with PayPal or debit/credit card below.
           </p>
 
@@ -141,6 +180,13 @@
             </p>
             <button type="button" class="button" id="btn-free-checkout">
               Complete free test order &amp; download
+            </button>
+          </div>
+
+          <div id="panel-giftcard-pay" class="checkout-panel" hidden>
+            <p class="checkout-panel-hint" id="giftcard-pay-hint">Your gift card covers this order.</p>
+            <button type="button" class="button" id="btn-giftcard-checkout">
+              Complete order with gift card
             </button>
           </div>
 

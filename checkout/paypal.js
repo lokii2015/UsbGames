@@ -90,9 +90,14 @@ function paypalMeUrl(amountCents, note, currency = "CAD") {
   return url;
 }
 
-async function createOrder(cart, siteUrl) {
+async function createOrder(cart, siteUrl, amountCentsOverride) {
   const token = await getAccessToken();
-  const value = formatAmount(cart.amount);
+  const cents =
+    amountCentsOverride != null ? Math.max(0, Math.round(amountCentsOverride)) : cart.amount;
+  if (cents < 1) {
+    throw new Error("PayPal order amount must be at least $0.01");
+  }
+  const value = formatAmount(cents);
   const customId = cart.productIds.join(",").slice(0, 127);
 
   const res = await fetch(`${apiBase()}/v2/checkout/orders`, {

@@ -20,7 +20,7 @@ function save(data) {
   fs.writeFileSync(FILE, JSON.stringify(data, null, 2));
 }
 
-function set(orderId, { email, productIds, isGift, buyerEmail, giftMessage }) {
+function set(orderId, { email, productIds, isGift, buyerEmail, giftMessage, giftCardCode, giftCardAppliedCents }) {
   const all = load();
   const row = {
     email: String(email).trim().toLowerCase(),
@@ -31,6 +31,10 @@ function set(orderId, { email, productIds, isGift, buyerEmail, giftMessage }) {
     row.isGift = true;
     row.buyerEmail = String(buyerEmail || "").trim().toLowerCase();
     row.giftMessage = String(giftMessage || "").trim().slice(0, 500);
+  }
+  if (giftCardCode && giftCardAppliedCents > 0) {
+    row.giftCardCode = String(giftCardCode).trim().toUpperCase();
+    row.giftCardAppliedCents = Math.round(giftCardAppliedCents);
   }
   all[orderId] = row;
   save(all);
