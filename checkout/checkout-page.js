@@ -245,7 +245,7 @@
         ok: false,
         data: {
           error:
-            "Checkout API unreachable. On Netlify: link /api to Render (netlify.toml) or set meta usbgames-api. See checkout/DEPLOY-NETLIFY.txt.",
+            "Checkout API unreachable. Use https://usbgames.onrender.com or run npm start in checkout/ locally.",
         },
       };
     }

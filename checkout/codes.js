@@ -1,5 +1,7 @@
 /**
- * One-time redeem codes (USB-XXXX-XXXX) — created only after payment, expire in 48h.
+ * Redemption codes — created only after payment.
+ * Regular: USB-XXXX-XXXX (48h default)
+ * Gift:    USB-GXXX-XXXX (days — see GIFT_CODE_TTL_DAYS)
  */
 const crypto = require("crypto");
 const fs = require("fs");
@@ -14,6 +16,11 @@ const CODE_TTL_MS =
   60 *
   60 *
   1000;
+const GIFT_CODE_TTL_DAYS =
+  Number(process.env.GIFT_CODE_TTL_DAYS) > 0 ? Number(process.env.GIFT_CODE_TTL_DAYS) : 7;
+const GIFT_CODE_TTL_MS = GIFT_CODE_TTL_DAYS * 24 * 60 * 60 * 1000;
+const GIFT_CODE_RE = /^USB-G[A-Z0-9]{4}-[A-Z0-9]{4}$/;
+const STANDARD_CODE_RE = /^USB-[A-Z0-9]{4}-[A-Z0-9]{4}$/;
 
 function ensureDir() {
   if (!fs.existsSync(DATA_DIR)) fs.mkdirSync(DATA_DIR, { recursive: true });
@@ -47,10 +54,40 @@ function generateCode() {
   return `USB-${a}-${b}`;
 }
 
+/** Gift codes: USB-GXXXX-XXXX — the G marks it as a gift */
+function generateGiftCode() {
+  const a = crypto.randomBytes(2).toString("hex").toUpperCase();
+  const b = crypto.randomBytes(2).toString("hex").toUpperCase();
+  return `USB-G${a}-${b}`;
+}
+
+function isGiftCode(code) {
+  return GIFT_CODE_RE.test(normalizeCode(code));
+}
+
+function isValidCodeFormat(code) {
+  const c = normalizeCode(code);
+  return GIFT_CODE_RE.test(c) || STANDARD_CODE_RE.test(c);
+}
+
+function ttlMsForRow(row) {
+  if (row?.isGift) return GIFT_CODE_TTL_MS;
+  return CODE_TTL_MS;
+}
+
+function expiryLabelForRow(row) {
+  if (row?.isGift) {
+    const days = GIFT_CODE_TTL_DAYS;
+    return days === 1 ? "1 day" : `${days} days`;
+  }
+  const hours = Math.round(CODE_TTL_MS / (60 * 60 * 1000));
+  return hours === 1 ? "1 hour" : `${hours} hours`;
+}
+
 function expiresAtForRow(row) {
   if (row.expiresAt) return new Date(row.expiresAt).getTime();
   const created = row.createdAt ? new Date(row.createdAt).getTime() : 0;
-  return created + CODE_TTL_MS;
+  return created + ttlMsForRow(row);
 }
 
 function isExpired(row) {

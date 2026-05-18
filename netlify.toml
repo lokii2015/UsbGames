@@ -4,12 +4,11 @@
 [build]
   publish = "."
 
-# After you deploy checkout/ to Render, uncomment and set YOUR render URL:
-# [[redirects]]
-#   from = "/api/*"
-#   to = "https://YOUR-APP.onrender.com/api/:splat"
-#   status = 200
-#   force = true
+[[redirects]]
+  from = "/api/*"
+  to = "https://usbgames.onrender.com/api/:splat"
+  status = 200
+  force = true
 
 # Block direct access to secrets and game zips (downloads only via /api/download after payment)
 [[redirects]]

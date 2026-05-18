@@ -6,6 +6,7 @@ const SUPPORT_EMAIL = (
 const SUPPORT_MAILTO = `mailto:${SUPPORT_EMAIL}`;
 
 function redeemSupportHtml(siteUrl) {
+  const support = `${escapeHtml(siteUrl)}/support.html`;
   const refund = `${escapeHtml(siteUrl)}/refund.html`;
   const mail = escapeHtml(SUPPORT_EMAIL);
   return (
@@ -15,9 +16,9 @@ function redeemSupportHtml(siteUrl) {
     `<ul style="margin:0.5rem 0 0 1.1rem;padding:0">` +
     `<li>A photo or screenshot of your <strong>PayPal payment receipt</strong> (or checkout confirmation)</li>` +
     `<li>A screenshot of the <strong>error message</strong> when you try to redeem on our site</li>` +
-  `</ul>` +
+    `</ul>` +
     `This helps us confirm the purchase is yours. The same applies if someone else got into your email and used your code before you did.` +
-    ` See our <a href="${refund}">Refund Policy</a> for full details.` +
+    ` See <a href="${support}">Support</a> and our <a href="${refund}">Refund Policy</a>.` +
     `</p>`
   );
 }
@@ -29,6 +30,7 @@ function redeemSupportText(siteUrl) {
     `- A photo/screenshot of your PayPal payment receipt (or checkout confirmation)\n` +
     `- A screenshot of the error when you try to redeem on our site\n` +
     `This helps us confirm the purchase is yours. Same if someone used your email and took your code before you.\n` +
+    `Support: ${siteUrl}/support.html\n` +
     `Refund Policy: ${siteUrl}/refund.html`
   );
 }
