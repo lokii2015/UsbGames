@@ -1,0 +1,1 @@
+Retro pixel Tic-Tac-Toe. Battle medium AI or play local two-player — track wins, losses, and draws.

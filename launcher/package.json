@@ -1,0 +1,42 @@
+{
+  "name": "usbgames-launcher",
+  "productName": "UsbGames",
+  "version": "0.1.0",
+  "description": "UsbGames Launcher — offline USB game library",
+  "main": "main.js",
+  "author": "UsbGames",
+  "scripts": {
+    "start": "electron .",
+    "build:icon": "node scripts/build-icon.js",
+    "pack:win": "npm run build:icon && cross-env CSC_IDENTITY_AUTO_DISCOVERY=false electron-builder --win dir --x64",
+    "ship": "npm run pack:win && node scripts/ship-zip.js && node scripts/package-game-zips.js",
+    "package:games": "node scripts/package-game-zips.js"
+  },
+  "build": {
+    "appId": "com.usbgames.launcher",
+    "directories": {
+      "output": "dist",
+      "buildResources": "build"
+    },
+    "files": [
+      "main.js",
+      "preload.js",
+      "index.html",
+      "styles.css",
+      "renderer.js",
+      "build/icon.ico"
+    ],
+    "win": {
+      "target": ["dir"],
+      "icon": "build/icon.ico",
+      "signAndEditExecutable": false
+    }
+  },
+  "devDependencies": {
+    "cross-env": "^10.1.0",
+    "electron": "^28.3.3",
+    "electron-builder": "^24.13.3",
+    "png-to-ico": "^2.1.8",
+    "sharp": "^0.33.5"
+  }
+}

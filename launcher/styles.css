@@ -1,0 +1,370 @@
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  margin: 0;
+  height: 100%;
+  background: #0f0f14;
+  color: #e8e8ec;
+  font-family: "Consolas", "Lucida Console", "Courier New", monospace;
+  font-size: 22px;
+  line-height: 1.35;
+  user-select: none;
+  overflow: hidden;
+}
+
+.app {
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+}
+
+/* —— Top bar —— */
+.top-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 16px;
+  background: #15151d;
+  border-bottom: 2px solid #1e7a6c;
+}
+
+.top-bar__brand {
+  font-family: "Consolas", "Lucida Console", monospace;
+  font-weight: 700;
+  font-size: 11px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: #2ee6c9;
+}
+
+.top-bar__ver {
+  font-size: 20px;
+  color: #6b8f7a;
+}
+
+/* —— Main —— */
+.main {
+  flex: 1;
+  display: flex;
+  min-height: 0;
+  gap: 0;
+}
+
+.panel {
+  min-width: 0;
+}
+
+.panel--list {
+  width: 38%;
+  max-width: 320px;
+  border-right: 2px solid #1a2a28;
+  background: #12121a;
+  display: flex;
+  flex-direction: column;
+}
+
+.panel__head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  padding: 8px 8px 0 14px;
+}
+
+.btn-refresh {
+  flex-shrink: 0;
+  width: 36px;
+  height: 32px;
+  padding: 0;
+  border: 1px solid #2a3d38;
+  border-radius: 6px;
+  background: #1a1a24;
+  color: #8edcc6;
+  font-size: 18px;
+  line-height: 1;
+  cursor: pointer;
+}
+
+.btn-refresh:hover {
+  border-color: #2ee6c9;
+  color: #2ee6c9;
+}
+
+.panel__label {
+  font-family: "Consolas", "Lucida Console", monospace;
+  font-weight: 700;
+  font-size: 8px;
+  padding: 4px 0 8px;
+  color: #3dd4b8;
+  text-transform: uppercase;
+  letter-spacing: 0.15em;
+}
+
+.game-list {
+  list-style: none;
+  margin: 0;
+  padding: 8px;
+  overflow-y: auto;
+  flex: 1;
+}
+
+.game-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 12px;
+  margin-bottom: 6px;
+  border-radius: 8px;
+  cursor: pointer;
+  border: 2px solid transparent;
+  background: #181822;
+  transition: border-color 0.12s ease, box-shadow 0.12s ease;
+}
+
+.game-item:hover {
+  background: #1c1c2a;
+}
+
+.game-item.is-selected {
+  border-color: #2ee6c9;
+  box-shadow:
+    0 0 12px rgba(46, 230, 201, 0.35),
+    inset 0 0 0 1px rgba(46, 230, 201, 0.2);
+  background: #1a2528;
+}
+
+.game-item__icon {
+  width: 40px;
+  height: 40px;
+  border-radius: 6px;
+  object-fit: cover;
+  background: #252530;
+  flex-shrink: 0;
+  image-rendering: pixelated;
+}
+
+.game-item__icon--empty {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: "Consolas", "Lucida Console", monospace;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  font-size: 14px;
+  color: #2ee6c9;
+}
+
+.game-item__name {
+  font-size: 24px;
+  color: #dce5e2;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.empty-hint {
+  padding: 12px 14px;
+  font-size: 20px;
+  color: #7a9088;
+}
+
+.empty-hint code {
+  font-size: 0.95em;
+  color: #2ee6c9;
+}
+
+.panel--preview {
+  flex: 1;
+  background: #0f0f14;
+  padding: 20px 24px;
+  display: flex;
+  flex-direction: column;
+  overflow-y: auto;
+}
+
+.preview-empty {
+  margin: auto;
+  text-align: center;
+  max-width: 360px;
+  color: #5a6e66;
+}
+
+.preview-empty p:first-child {
+  font-family: "Consolas", "Lucida Console", monospace;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  font-size: 10px;
+  color: #3d6b5f;
+  margin-bottom: 12px;
+}
+
+.preview-empty__sub {
+  font-size: 20px;
+}
+
+.preview-content {
+  animation: none;
+}
+
+.preview-content__icon-wrap {
+  position: relative;
+  width: 120px;
+  height: 120px;
+  margin-bottom: 16px;
+}
+
+.preview-content__icon {
+  width: 120px;
+  height: 120px;
+  border-radius: 12px;
+  object-fit: cover;
+  border: 3px solid #1e7a6c;
+  background: #1a1a24;
+  image-rendering: pixelated;
+}
+
+.preview-content__icon.hidden {
+  display: none;
+}
+
+.preview-content__icon-fallback {
+  width: 120px;
+  height: 120px;
+  border-radius: 12px;
+  border: 3px solid #1e7a6c;
+  background: #162220;
+  display: none;
+  align-items: center;
+  justify-content: center;
+  font-family: "Consolas", "Lucida Console", monospace;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  font-size: 36px;
+  color: #2ee6c9;
+}
+
+.preview-content__icon-fallback:not(.hidden) {
+  display: flex;
+}
+
+.preview-content__title {
+  font-family: "Consolas", "Lucida Console", monospace;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  font-size: 14px;
+  line-height: 1.5;
+  color: #2ee6c9;
+  margin: 0 0 12px;
+  max-width: 520px;
+}
+
+.preview-content__desc {
+  margin: 0 0 16px;
+  max-width: 520px;
+  color: #b8c4bf;
+  font-size: 24px;
+  white-space: pre-wrap;
+}
+
+.preview-content__meta {
+  display: flex;
+  align-items: baseline;
+  gap: 10px;
+  margin-bottom: 20px;
+  padding: 10px 14px;
+  background: #15151d;
+  border-radius: 8px;
+  border: 1px solid #252532;
+  max-width: 320px;
+}
+
+.meta-label {
+  font-family: "Consolas", "Lucida Console", monospace;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  font-size: 8px;
+  color: #6b8f7a;
+}
+
+.meta-value {
+  font-size: 26px;
+  color: #8edcc6;
+}
+
+.btn-play {
+  font-family: "Consolas", "Lucida Console", monospace;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  font-size: 12px;
+  padding: 14px 28px;
+  border: none;
+  border-radius: 8px;
+  background: #1e7a6c;
+  color: #0f0f14;
+  cursor: pointer;
+  box-shadow: 0 0 16px rgba(30, 122, 108, 0.4);
+}
+
+.btn-play:hover {
+  background: #2ee6c9;
+  box-shadow: 0 0 20px rgba(46, 230, 201, 0.45);
+}
+
+.btn-play:active {
+  transform: translateY(1px);
+}
+
+.play-hint {
+  margin-top: 10px;
+  font-size: 20px;
+  color: #c9a227;
+  max-width: 480px;
+}
+
+.hidden {
+  display: none !important;
+}
+
+/* —— Bottom bar —— */
+.bottom-bar {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  padding: 8px 16px;
+  background: #15151d;
+  border-top: 2px solid #1e7a6c;
+  font-size: 22px;
+}
+
+.bottom-bar__usb {
+  color: #5cd4a8;
+}
+
+.bottom-bar__library {
+  flex: 1;
+  color: #7a9088;
+}
+
+.btn-settings {
+  font-family: "Consolas", "Lucida Console", monospace;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  font-size: 10px;
+  padding: 8px 12px;
+  border-radius: 6px;
+  border: 1px solid #2a3d38;
+  background: #1a1a24;
+  color: #8edcc6;
+  cursor: pointer;
+}
+
+.btn-settings:hover {
+  border-color: #2ee6c9;
+  color: #2ee6c9;
+}
+

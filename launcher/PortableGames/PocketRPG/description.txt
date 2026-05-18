@@ -1,0 +1,2 @@
+Mini JRPG with three areas, NPC dialogue, turn-based combat,
+shop gear, inventory, leveling, and save progress to your USB.

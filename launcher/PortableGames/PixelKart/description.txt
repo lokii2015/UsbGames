@@ -1,0 +1,2 @@
+Top-down arcade kart racing with 4 tracks, 3 karts, and AI rivals.
+Collect boost, shield, and missile items. 3-lap races — beat your best times.

@@ -1,0 +1,1 @@
+Retro casino blackjack — bet chips, hit, stand, double down. Track wins and blackjacks on your USB profile.

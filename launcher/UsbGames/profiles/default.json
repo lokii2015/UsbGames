@@ -1,0 +1,127 @@
+{
+  "profile": "default",
+  "games": {
+    "TicTacToe": {
+      "wins": 1,
+      "losses": 3,
+      "draws": 1,
+      "matches": 5,
+      "ai_wins": 0,
+      "ai_losses": 3,
+      "ai_draws": 1,
+      "pvp_matches": 1
+    },
+    "PixelFlap": {
+      "highscore": 21,
+      "scores": [
+        21,
+        8,
+        4,
+        3,
+        2,
+        1
+      ]
+    },
+    "TicTacToeAIPlus": {
+      "wins": 0,
+      "losses": 0,
+      "draws": 3,
+      "matches": 3,
+      "ai_wins": 0,
+      "ai_losses": 0,
+      "ai_draws": 3,
+      "pvp_matches": 0
+    },
+    "PixelFlapTurbo": {
+      "highscore": 15,
+      "scores": [
+        15,
+        14,
+        10,
+        7,
+        2
+      ]
+    },
+    "BrickBreaker": {
+      "highscore": 157,
+      "scores": [
+        157,
+        70
+      ]
+    },
+    "SpaceCommand": {
+      "highscore": 5500,
+      "scores": [
+        5500,
+        2150,
+        1650,
+        1300,
+        1200,
+        900
+      ]
+    },
+    "MemoryMatch": {
+      "games_played": 1,
+      "games_won": 1,
+      "best_moves": {
+        "easy": 0,
+        "medium": 0,
+        "hard": 29
+      },
+      "best_time": {
+        "easy": 0.0,
+        "medium": 0.0,
+        "hard": 53.8
+      }
+    },
+    "GridDefense": {
+      "best_wave": 27,
+      "games_played": 7,
+      "unlocked": {}
+    },
+    "PixelKart": {
+      "best_times": {},
+      "wins": 0,
+      "races": 3
+    },
+    "PocketRPG": {
+      "cleared": false,
+      "level": 2
+    },
+    "BlockStackDX": {
+      "classic": {
+        "highscore": 498,
+        "scores": [
+          498,
+          322
+        ]
+      },
+      "speed": {
+        "highscore": 350,
+        "scores": [
+          350,
+          194,
+          188
+        ]
+      }
+    },
+    "PixelChomp": {
+      "classic": {
+        "highscore": 1450,
+        "scores": [
+          1450
+        ]
+      },
+      "speed": {
+        "highscore": 0,
+        "scores": []
+      }
+    },
+    "BlackJack": {
+      "hands_won": 0,
+      "hands_lost": 1,
+      "blackjacks": 0,
+      "best_chips": 1000
+    }
+  }
+}

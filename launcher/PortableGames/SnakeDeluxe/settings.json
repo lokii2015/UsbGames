@@ -1,0 +1,9 @@
+{
+  "music": false,
+  "sfx": true,
+  "show_grid": true,
+  "map_size": "small",
+  "skin": "fire",
+  "speed": "fast",
+  "map_layout": "portals"
+}

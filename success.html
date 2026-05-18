@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Thank you — UsbGames</title>
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <header class="site-header">
+      <a class="brand-mark" href="index.html" aria-label="UsbGames — Home">
+        <img class="brand-logo brand-logo--header" src="logo.svg" width="52" height="18" alt="" />
+      </a>
+      <nav>
+        <a href="index.html">Home</a>
+        <a href="games.html">Games</a>
+        <a href="store.html">Store</a>
+        <a href="faq.html">FAQ</a>
+        <a href="download.html">Download</a>
+      </nav>
+    </header>
+    <main class="container">
+      <h1 class="title small">Thank you</h1>
+      <p class="subtitle" id="status">Verifying your payment…</p>
+      <div id="downloads" class="download-box" hidden>
+        <p><strong id="product-name"></strong></p>
+        <ul class="steps" id="download-list"></ul>
+        <p class="games-install-hint">
+          Unzip into <code>UsbGames\PortableGames\</code> on your USB. Keep the folder names inside each zip.
+        </p>
+      </div>
+      <p id="error-msg" class="games-install-hint" hidden></p>
+      <p class="games-install-hint">
+        <a href="store.html">Back to store</a> ·
+        <a href="refund.html">Refund policy</a>
+      </p>
+    </main>
+    <footer class="site-footer">
+      <nav class="site-footer-nav" aria-label="Legal">
+        <a href="terms.html">Terms</a>
+        <a href="privacy.html">Privacy</a>
+        <a href="refund.html">Refunds</a>
+      </nav>
+      <p class="site-footer-copy">© 2026 UsbGames. All rights reserved. Founded by Ethan Ciuffreda</p>
+    </footer>
+    <script src="checkout/api-base.js"></script>
+    <script>
+      (async function () {
+        const apiBase = typeof window.USBGAMES_API === "string" ? window.USBGAMES_API : "";
+        const params = new URLSearchParams(location.search);
+        const sessionId = params.get("session_id") || params.get("token");
+        const status = document.getElementById("status");
+        const box = document.getElementById("downloads");
+        const list = document.getElementById("download-list");
+        const err = document.getElementById("error-msg");
+
+        if (!sessionId) {
+          status.textContent = "Missing checkout session.";
+          err.hidden = false;
+          err.textContent =
+            "Return from PayPal checkout or contact support with your receipt.";
+          return;
+        }
+
+        try {
+          const res = await fetch(
+            apiBase +
+              "/api/verify-session?session_id=" +
+              encodeURIComponent(sessionId)
+          );
+          const data = await res.json();
+          if (!res.ok) throw new Error(data.message || data.error || "Verification failed");
+
+          status.textContent = "Payment confirmed. Download your files below:";
+          const names = (data.products || [data.product]).map((p) => p.name).join(", ");
+          document.getElementById("product-name").textContent = names;
+          try {
+            localStorage.removeItem("usbgames_cart_v1");
+          } catch (_) {}
+          data.downloads.forEach((d) => {
+            const li = document.createElement("li");
+            const a = document.createElement("a");
+            a.className = "button";
+            a.href = d.url;
+            a.download = d.filename;
+            a.textContent = "Download " + d.name;
+            li.appendChild(a);
+            list.appendChild(li);
+          });
+          box.hidden = false;
+        } catch (e) {
+          status.textContent = "Could not verify payment";
+          err.hidden = false;
+          err.textContent = e.message;
+        }
+      })();
+    </script>
+  </body>
+</html>

@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta
+      http-equiv="Content-Security-Policy"
+      content="default-src 'self'; style-src 'self'"
+    />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>UsbGames</title>
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <div class="app">
+      <header class="top-bar">
+        <span class="top-bar__brand">UsbGames</span>
+        <span class="top-bar__ver">v0.1</span>
+      </header>
+
+      <main class="main">
+        <aside class="panel panel--list" aria-label="Game list">
+          <div class="panel__head">
+            <div class="panel__label">Library</div>
+            <button
+              type="button"
+              class="btn-refresh"
+              id="btnRefresh"
+              title="Rescan PortableGames"
+            >
+              &#8635;
+            </button>
+          </div>
+          <ul id="gameList" class="game-list"></ul>
+          <div id="emptyHint" class="empty-hint hidden">
+            No games in <code>PortableGames</code> on this USB folder. Use
+            <strong>…</strong> to open it.
+          </div>
+        </aside>
+
+        <section class="panel panel--preview" aria-live="polite">
+          <div id="previewEmpty" class="preview-empty">
+            <p>Select a game</p>
+            <p class="preview-empty__sub">
+              Games load from <code>PortableGames</code> next to
+              <code>UsbGames.exe</code> on your USB.
+            </p>
+          </div>
+          <div id="previewContent" class="preview-content hidden">
+            <div class="preview-content__icon-wrap">
+              <img id="previewIcon" class="preview-content__icon" alt="" />
+              <div
+                id="previewIconFallback"
+                class="preview-content__icon-fallback"
+              ></div>
+            </div>
+            <h2 id="previewTitle" class="preview-content__title"></h2>
+            <p id="previewDesc" class="preview-content__desc"></p>
+            <button type="button" id="playBtn" class="btn-play">Play</button>
+            <p id="playHint" class="play-hint hidden"></p>
+          </div>
+        </section>
+      </main>
+
+      <footer class="bottom-bar">
+        <span class="bottom-bar__usb" id="usbStatus">USB: Connected</span>
+        <span class="bottom-bar__library" id="libraryInfo">Library</span>
+        <button type="button" class="btn-settings" id="btnOpenFolder" title="Open PortableGames folder">
+          ...
+        </button>
+      </footer>
+    </div>
+    <script src="renderer.js"></script>
+  </body>
+</html>

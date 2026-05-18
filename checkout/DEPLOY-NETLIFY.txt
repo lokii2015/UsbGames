@@ -1,0 +1,36 @@
+UsbGames: Netlify (site) + Render (checkout API)
+=============================================
+
+Netlify only hosts HTML/CSS/JS. PayPal + downloads need the checkout server
+online somewhere. You do NOT run it on your PC — Render runs it for you (free tier).
+
+STEP 1 — Deploy API to Render
+-----------------------------
+1. Push this repo to GitHub.
+2. https://dashboard.render.com → New → Web Service → your repo.
+3. Root directory: checkout
+4. Build: npm install   Start: npm start
+5. Environment variables (same as checkout/.env):
+   PAYPAL_CLIENT_ID, PAYPAL_CLIENT_SECRET, PAYPAL_MODE
+   DOWNLOAD_SIGNING_SECRET
+   SITE_URL = your Netlify URL (e.g. https://usbgames.netlify.app)
+   FAQ_ADMIN_CODE (optional)
+6. Upload game zips into checkout/downloads/ on Render (or commit them if repo allows size).
+7. Copy your Render URL, e.g. https://usbgames-checkout.onrender.com
+
+STEP 2 — Connect Netlify to the API
+-----------------------------------
+Edit netlify.toml in the repo root — uncomment the [[redirects]] block and replace
+YOUR-APP with your Render service name.
+
+Redeploy Netlify. Checkout will call /api/... on your Netlify domain; Netlify
+forwards those requests to Render.
+
+STEP 3 — PayPal
+---------------
+In PayPal Developer dashboard, set return URLs to use your Netlify SITE_URL
+(success.html lives on Netlify).
+
+Alternative without proxy: add to checkout.html <head>:
+  <meta name="usbgames-api" content="https://usbgames-checkout.onrender.com" />
+and load checkout/api-base.js before checkout-page.js.

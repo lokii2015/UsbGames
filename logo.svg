@@ -1,0 +1,25 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 116 40" role="img" aria-labelledby="logo-title">
+  <title id="logo-title">UsbGames USB logo</title>
+  <defs>
+    <mask id="keyring-hole">
+      <rect width="100%" height="100%" fill="#fff" />
+      <ellipse cx="22" cy="20" rx="6.5" ry="11" fill="#000" />
+    </mask>
+  </defs>
+  <!-- Turquoise body + rounded keyring end -->
+  <path
+    mask="url(#keyring-hole)"
+    fill="#38cfe0"
+    d="M 86 8 H 30 Q 12 8 12 20 Q 12 32 30 32 H 86 V 8 Z"
+  />
+  <!-- Neck before plug -->
+  <rect x="84" y="11" width="5" height="18" rx="1" fill="#2fb8c9" />
+  <!-- USB-A housing -->
+  <rect x="87" y="8" width="27" height="24" rx="2.5" fill="#1a1d22" />
+  <!-- Metal insert -->
+  <rect x="90" y="11" width="21" height="18" rx="1.5" fill="#5b6578" />
+  <rect x="92" y="13" width="2" height="14" rx="0.5" fill="#3d4555" />
+  <rect x="96" y="13" width="2" height="14" rx="0.5" fill="#3d4555" />
+  <rect x="100" y="13" width="2" height="14" rx="0.5" fill="#3d4555" />
+  <rect x="104" y="13" width="2" height="14" rx="0.5" fill="#3d4555" />
+</svg>

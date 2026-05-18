@@ -1,0 +1,275 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Store — UsbGames</title>
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <header class="site-header">
+      <a class="brand-mark" href="index.html" aria-label="UsbGames — Home">
+        <img class="brand-logo brand-logo--header" src="logo.svg" width="52" height="18" alt="" />
+      </a>
+      <nav>
+        <a href="index.html">Home</a>
+        <a href="games.html">Games</a>
+        <a href="store.html" aria-current="page">Store</a>
+        <a href="checkout.html" data-cart-link>
+          Cart <span class="cart-badge" data-cart-count hidden>0</span>
+        </a>
+        <a href="faq.html">FAQ</a>
+        <a href="download.html">Download</a>
+      </nav>
+    </header>
+    <main class="container">
+      <h1 class="title small">UsbGames Store</h1>
+      <p class="subtitle">
+        Premium deluxe editions for USB play. Prices in <strong>CAD</strong> — pay once with PayPal, debit, or credit card.
+      </p>
+
+      <article class="store-featured">
+        <div class="store-featured-body">
+          <h2>UsbGames Starter Pack</h2>
+          <p class="store-price store-price--big">$4.99 <span class="price-currency">CAD</span></p>
+          <p class="card-desc">
+            Three deluxe classics: Snake Deluxe, Pixel Flap Turbo, and Tic-Tac-Toe AI+.
+            Best value — save vs buying separately ($5.97 CAD).
+          </p>
+          <ul class="store-list">
+            <li>Snake Deluxe — skins, maps, speed modes</li>
+            <li>Pixel Flap Turbo — power-ups, levels, obstacles</li>
+            <li>Tic-Tac-Toe AI+ — hard AI, stats, animations</li>
+          </ul>
+          <button
+            type="button"
+            class="button"
+            data-checkout-product="starter_pack"
+          >
+            Buy Starter Pack
+          </button>
+        </div>
+      </article>
+
+      <article class="store-featured store-featured--alt">
+        <div class="store-featured-body">
+          <h2>Retro Arcade Pack</h2>
+          <p class="store-price store-price--big">$5.48 <span class="price-currency">CAD</span></p>
+          <p class="card-desc">
+            All three new premium games — save $0.99 vs buying separately ($6.47 CAD).
+          </p>
+          <ul class="store-list">
+            <li>Grid Defense — tower defense, 5 maps, 12 towers</li>
+            <li>Pixel Kart — 4 tracks, items, AI racing</li>
+            <li>Pocket RPG — JRPG battles, shop, saves</li>
+          </ul>
+          <button
+            type="button"
+            class="button"
+            data-checkout-product="retro_arcade_pack"
+          >
+            Buy Retro Arcade Pack
+          </button>
+        </div>
+      </article>
+
+      <h2 class="store-section-title">Premium games</h2>
+      <div class="grid store-grid">
+        <article class="card card--premium card--test">
+          <span class="badge-premium">TEST · $0</span>
+          <img class="card-icon" src="images/games/snake.png" width="72" height="72" alt="" />
+          <h2>Paid Game</h2>
+          <p class="store-price">$0.00 <span class="price-currency">CAD</span></p>
+          <p class="card-desc">
+            Download test only — use this to check that checkout gives you <code>PaidGame.zip</code> after payment.
+            Folder: <code>PaidGame</code> in <code>PortableGames</code>.
+          </p>
+          <button
+            type="button"
+            class="button small"
+            data-checkout-product="paid_game"
+          >
+            Add test — $0.00 CAD
+          </button>
+        </article>
+        <article class="card card--premium">
+          <span class="badge-premium">TETRIS</span>
+          <img class="card-icon" src="images/games/blockstackdx.png" width="72" height="72" alt="" />
+          <h2>BlockStack DX</h2>
+          <p class="store-price">$4.99 <span class="price-currency">CAD</span></p>
+          <p class="card-desc">
+            Full falling-block puzzle. Classic &amp; speed modes, combo scoring,
+            neon themes — highscores on your USB profile.
+          </p>
+          <button
+            type="button"
+            class="button small"
+            data-checkout-product="blockstack_dx"
+          >
+            Buy — $4.99 CAD
+          </button>
+        </article>
+        <article class="card card--premium">
+          <span class="badge-premium">CASINO</span>
+          <img class="card-icon" src="images/games/blackjack.png" width="72" height="72" alt="" />
+          <h2>Black Jack</h2>
+          <p class="store-price">$5.99 <span class="price-currency">CAD</span></p>
+          <p class="card-desc">
+            Retro casino blackjack. Bet chips, hit, stand, or double down — track
+            wins and blackjacks on your USB profile.
+          </p>
+          <button
+            type="button"
+            class="button small"
+            data-checkout-product="black_jack"
+          >
+            Buy — $5.99 CAD
+          </button>
+        </article>
+        <article class="card card--premium">
+          <span class="badge-premium">CHASE</span>
+          <img class="card-icon" src="images/games/pixelchomp.png" width="72" height="72" alt="" />
+          <h2>Pixel Chomp</h2>
+          <p class="store-price">$7.99 <span class="price-currency">CAD</span></p>
+          <p class="card-desc">
+            Pac-Man-style maze chase. Eat dots, power pellets, and outsmart four
+            ghost AIs — classic &amp; speed modes, USB highscores.
+          </p>
+          <button
+            type="button"
+            class="button small"
+            data-checkout-product="pixel_chomp"
+          >
+            Buy — $7.99 CAD
+          </button>
+        </article>
+        <article class="card card--premium">
+          <span class="badge-premium">DELUXE</span>
+          <img class="card-icon" src="images/games/snake.png" width="72" height="72" alt="" />
+          <h2>Snake Deluxe</h2>
+          <p class="store-price">$1.99 <span class="price-currency">CAD</span></p>
+          <p class="card-desc">
+            Neon, fire &amp; glitch skins. Slow/normal/fast speed. Classic, wall &amp; portal maps.
+            Fullscreen on small/medium maps.
+          </p>
+          <button
+            type="button"
+            class="button small"
+            data-checkout-product="snake_deluxe"
+          >
+            Buy — $1.99 CAD
+          </button>
+        </article>
+        <article class="card card--premium">
+          <span class="badge-premium">AI+</span>
+          <img class="card-icon" src="images/games/tictactoeaiplus.png" width="72" height="72" alt="" />
+          <h2>Tic-Tac-Toe AI+</h2>
+          <p class="store-price">$1.99 <span class="price-currency">CAD</span></p>
+          <p class="card-desc">
+            Deluxe tic-tac-toe with easy, medium &amp; hard AI (minimax). Animated
+            moves and profile stats — offline forever.
+          </p>
+          <button
+            type="button"
+            class="button small"
+            data-checkout-product="tictactoe_aiplus"
+          >
+            Buy — $1.99 CAD
+          </button>
+        </article>
+        <article class="card card--premium">
+          <span class="badge-premium">TURBO</span>
+          <img class="card-icon" src="images/games/pixelflap.png" width="72" height="72" alt="" />
+          <h2>Pixel Flap Turbo</h2>
+          <p class="store-price">$1.99 <span class="price-currency">CAD</span></p>
+          <p class="card-desc">
+            Moving pipes, spikes, shield/slow/x2 power-ups. Drone, bird &amp; rocket characters.
+            Level-based progression.
+          </p>
+          <button
+            type="button"
+            class="button small"
+            data-checkout-product="pixel_flap_turbo"
+          >
+            Buy — $1.99 CAD
+          </button>
+        </article>
+        <article class="card card--premium">
+          <span class="badge-premium">NEW</span>
+          <img class="card-icon" src="images/games/griddefense.png" width="72" height="72" alt="" />
+          <h2>Grid Defense</h2>
+          <p class="store-price">$1.99 <span class="price-currency">CAD</span></p>
+          <p class="card-desc">
+            Tower defense — 5 maps, 12 unlockable towers. Build, upgrade (3 levels),
+            or sell for 65% refund.
+          </p>
+          <button
+            type="button"
+            class="button small"
+            data-checkout-product="grid_defense"
+          >
+            Buy — $1.99 CAD
+          </button>
+        </article>
+        <article class="card card--premium">
+          <span class="badge-premium">RACE</span>
+          <img class="card-icon" src="images/games/pixelkart.png" width="72" height="72" alt="" />
+          <h2>Pixel Kart</h2>
+          <p class="store-price">$2.49 <span class="price-currency">CAD</span></p>
+          <p class="card-desc">
+            Top-down kart racing — 4 tracks, 3 karts, AI rivals. Boost, shield &amp;
+            missile items. 3-lap races with best-time records.
+          </p>
+          <button
+            type="button"
+            class="button small"
+            data-checkout-product="pixel_kart"
+          >
+            Buy — $2.49 CAD
+          </button>
+        </article>
+        <article class="card card--premium">
+          <span class="badge-premium">RPG</span>
+          <img class="card-icon" src="images/games/pocketrpg.png" width="72" height="72" alt="" />
+          <h2>Pocket RPG</h2>
+          <p class="store-price">$1.99 <span class="price-currency">CAD</span></p>
+          <p class="card-desc">
+            Mini JRPG — village, woods, and crystal cave. Turn-based battles,
+            shop gear, NPC dialogue, leveling, and USB saves.
+          </p>
+          <button
+            type="button"
+            class="button small"
+            data-checkout-product="pocket_rpg"
+          >
+            Buy — $1.99 CAD
+          </button>
+        </article>
+      </div>
+
+      <p class="store-payment-note">
+        Secure checkout via PayPal — pay with PayPal, debit card, or credit card.
+        Payments go to <a href="https://paypal.me/EthanCiuffreda" rel="noopener noreferrer" target="_blank">paypal.me/EthanCiuffreda</a>.
+        By purchasing you agree to our <a href="terms.html">Terms</a> and <a href="refund.html">Refund policy</a>.
+      </p>
+
+      <p class="games-install-hint">
+        After purchase, unzip into <code>UsbGames\PortableGames\</code> on your USB (keep folder names:
+        <code>SnakeDeluxe</code>, <code>PixelFlapTurbo</code>, <code>TicTacToeAIPlus</code>, <code>GridDefense</code>, <code>PixelKart</code>, <code>PocketRPG</code>,         <code>BlockStackDX</code>, <code>PixelChomp</code>, <code>BlackJack</code>, <code>PaidGame</code>).
+        Free games (including Pong) are on the <a href="games.html">Games</a> page.
+      </p>
+    </main>
+    <footer class="site-footer">
+      <nav class="site-footer-nav" aria-label="Legal">
+        <a href="terms.html">Terms</a>
+        <a href="privacy.html">Privacy</a>
+        <a href="refund.html">Refunds</a>
+      </nav>
+      <p class="site-footer-copy">© 2026 UsbGames. All rights reserved. Founded by Ethan Ciuffreda</p>
+    </footer>
+    <script src="checkout/catalog.js"></script>
+    <script src="checkout/cart.js"></script>
+    <script src="checkout/cart-header.js"></script>
+    <script src="checkout/store-cart.js"></script>
+  </body>
+</html>

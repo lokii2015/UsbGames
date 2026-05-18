@@ -1,0 +1,1 @@
+Classic paddle tennis — vs CPU or local two-player, first to 11 wins.

@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Order received — UsbGames</title>
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <header class="site-header">
+      <a class="brand-mark" href="index.html" aria-label="UsbGames — Home">
+        <img class="brand-logo brand-logo--header" src="logo.svg" width="52" height="18" alt="" />
+      </a>
+      <nav>
+        <a href="index.html">Home</a>
+        <a href="games.html">Games</a>
+        <a href="store.html">Store</a>
+        <a href="redeem.html">Redeem</a>
+        <a href="download.html">Download</a>
+      </nav>
+    </header>
+    <main class="container">
+      <h1 class="title small">Payment received</h1>
+      <p class="subtitle" id="complete-msg">Check your email for your redemption code.</p>
+      <div class="card">
+        <ol class="steps">
+          <li>Open the email we sent to <strong id="complete-email">your Gmail</strong>.</li>
+          <li>Copy the code (looks like <strong>USB-XXXX-XXXX</strong>).</li>
+          <li>
+            <a class="button" href="redeem.html" id="redeem-link">Redeem code &amp; download</a>
+          </li>
+        </ol>
+        <p class="games-install-hint">
+          Your code expires in <strong>48 hours</strong> after purchase. Check spam if it is not in your inbox within a few minutes.
+        </p>
+        <p class="games-install-hint">
+          No code within <strong>48 hours</strong>? See our
+          <a href="refund.html">Refund Policy</a> and email
+          <a href="mailto:EthanCiuffreda12@gmail.com">EthanCiuffreda12@gmail.com</a>
+          with your PayPal receipt.
+        </p>
+      </div>
+      <p class="games-install-hint">
+        <a href="store.html">Back to store</a>
+      </p>
+    </main>
+    <footer class="site-footer">
+      <nav class="site-footer-nav" aria-label="Legal">
+        <a href="terms.html">Terms</a>
+        <a href="privacy.html">Privacy</a>
+        <a href="refund.html">Refunds</a>
+      </nav>
+      <p class="site-footer-copy">© 2026 UsbGames. All rights reserved. Founded by Ethan Ciuffreda</p>
+    </footer>
+    <script src="checkout/api-base.js"></script>
+    <script>
+      (async function () {
+        const params = new URLSearchParams(location.search);
+        const email = params.get("email");
+        const token = params.get("token");
+        if (email) {
+          document.getElementById("complete-email").textContent = email;
+          document.getElementById("redeem-link").href =
+            "redeem.html?email=" + encodeURIComponent(email);
+        }
+        if (token) {
+          const base = typeof window.USBGAMES_API === "string" ? window.USBGAMES_API : "";
+          try {
+            const res = await fetch(base + "/api/paypal/ensure-fulfillment", {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({ orderId: token }),
+            });
+            const data = await res.json();
+            if (data.email) {
+              document.getElementById("complete-email").textContent = data.email;
+              document.getElementById("redeem-link").href =
+                "redeem.html?email=" + encodeURIComponent(data.email);
+            }
+          } catch (_) {}
+        }
+      })();
+    </script>
+  </body>
+</html>

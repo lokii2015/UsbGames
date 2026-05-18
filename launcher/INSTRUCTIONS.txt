@@ -1,0 +1,19 @@
+UsbGames — USB install (no AppData)
+====================================
+
+ZIP contains:
+  UsbGames/
+    UsbGames.exe
+    (dlls, resources, …)
+    PortableGames/
+
+Unzip the whole UsbGames folder onto a USB drive.
+Run UsbGames\UsbGames.exe from the stick.
+
+DEVELOPERS
+----------
+  cd launcher
+  npm install
+  npm start
+
+  npm run ship   →  ../UsbGames-Launcher.zip + ../archive/UsbGames/

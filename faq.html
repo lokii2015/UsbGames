@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>FAQ — UsbGames</title>
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <header class="site-header">
+      <a class="brand-mark" href="index.html" aria-label="UsbGames — Home">
+        <img class="brand-logo brand-logo--header" src="logo.svg" width="52" height="18" alt="" />
+      </a>
+      <nav>
+        <a href="index.html">Home</a>
+        <a href="games.html">Games</a>
+        <a href="store.html">Store</a>
+        <a href="faq.html" aria-current="page">FAQ</a>
+        <a href="download.html">Download</a>
+      </nav>
+    </header>
+    <main class="container faq-page">
+      <h1 class="title small">Help &amp; FAQ</h1>
+      <p class="subtitle">
+        Answers about UsbGames — installs, purchases, games, and your USB launcher.
+      </p>
+
+      <p id="faq-boot-error" class="form-error" hidden></p>
+
+      <script type="application/json" id="faq-seed-data">
+{"faqs":[{"id":"8392fa33bcc58a1f","question":"When are new games coming out?","answer":"We Cant Properly Anwser That :("}]}
+      </script>
+
+      <div class="faq-tabs" role="tablist" aria-label="FAQ sections">
+        <button type="button" class="faq-tab faq-tab--active" id="tab-faq" role="tab" aria-selected="true" aria-controls="panel-faq">
+          FAQ
+        </button>
+        <button type="button" class="faq-tab faq-tab--staff" id="tab-new" role="tab" aria-selected="false" aria-controls="panel-new">
+          New FAQ
+        </button>
+      </div>
+
+      <section id="panel-faq" class="faq-panel" role="tabpanel" aria-labelledby="tab-faq">
+        <div id="faq-list" class="faq-accordion"></div>
+        <p id="faq-empty" class="games-install-hint hidden">No FAQ entries yet.</p>
+      </section>
+
+      <section id="panel-new" class="faq-panel hidden" role="tabpanel" aria-labelledby="tab-new" hidden>
+        <div id="new-locked">
+          <p class="games-install-hint">Staff only — enter your code to add a new FAQ.</p>
+          <form id="new-unlock-form" class="account-form faq-admin-unlock">
+            <label>
+              Staff code
+              <input type="password" id="new-code" name="code" autocomplete="off" required />
+            </label>
+            <button type="submit" class="button">Unlock</button>
+            <p id="new-unlock-error" class="form-error" hidden></p>
+          </form>
+        </div>
+        <div id="new-unlocked" class="hidden" hidden>
+          <p class="games-install-hint">Add a question and answer. It appears on the FAQ tab for everyone on this site.</p>
+          <form id="new-faq-form" class="account-form faq-ask-form">
+            <label>
+              Question
+              <input type="text" name="question" required minlength="5" maxlength="300" placeholder="e.g. How do I install a game?" />
+            </label>
+            <label>
+              Answer
+              <textarea name="answer" rows="6" required minlength="5" maxlength="4000" placeholder="Write the full answer…"></textarea>
+            </label>
+            <button type="submit" class="button">Add FAQ</button>
+            <p id="new-faq-success" class="faq-success" hidden></p>
+            <p id="new-faq-error" class="form-error" hidden></p>
+          </form>
+          <button type="button" class="button button--secondary" id="btn-new-lock">Lock again</button>
+          <button type="button" class="button button--secondary" id="btn-export-faq">Download faq-data.json</button>
+          <p class="games-install-hint">Upload the downloaded file to your site (replace <code>faq-data.json</code>) so all visitors see new FAQs.</p>
+        </div>
+      </section>
+    </main>
+    <footer class="site-footer">
+      <nav class="site-footer-nav" aria-label="Legal">
+        <a href="terms.html">Terms</a>
+        <a href="privacy.html">Privacy</a>
+        <a href="refund.html">Refunds</a>
+      </nav>
+      <p class="site-footer-copy">© 2026 UsbGames. All rights reserved. Founded by Ethan Ciuffreda</p>
+    </footer>
+    <script src="faq.js?v=4"></script>
+  </body>
+</html>

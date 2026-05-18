@@ -1,0 +1,5 @@
+# Keep Netlify deploy small and safe — API + zips live on Render
+checkout/node_modules
+checkout/.env
+checkout/data
+checkout/downloads

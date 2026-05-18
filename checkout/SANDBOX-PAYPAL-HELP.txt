@@ -1,0 +1,76 @@
+PayPal SANDBOX — you CANNOT use your real PayPal account
+========================================================
+
+Sandbox (PAYPAL_MODE=sandbox) and Live are TWO SEPARATE WORLDS:
+  - Sandbox checkout → sandbox.paypal.com → fake money only
+  - Your REAL PayPal (personal + paypal.me) → LIVE only (PAYPAL_MODE=live + Live API keys)
+
+You cannot pay sandbox with a real account, or pay live with a sandbox buyer.
+That is how PayPal works — not a bug in this site.
+
+To test WITHOUT your real account:
+  1. Pay with test card (below), OR
+  2. Log in with a Personal sandbox buyer from Developer Dashboard, OR
+  3. Store → Paid Game ($0) → free order (no PayPal)
+
+To take REAL money with YOUR personal PayPal + paypal.me:
+  - Developer Dashboard → Apps → Live tab → Live Client ID + Secret
+  - checkout/.env: PAYPAL_MODE=live
+  - Deploy API to Render; test on Netlify with /api proxy
+
+DO NOT PUT THESE IN checkout/.env (UsbGames does not use them):
+  - NVP/SOAP Username (sb-xxxx_api1.business.example.com)
+  - NVP Password
+  - NVP Signature
+Those are for old PayPal APIs. This site uses REST only:
+  PAYPAL_CLIENT_ID + PAYPAL_CLIENT_SECRET from
+  https://developer.paypal.com/dashboard/applications (Sandbox tab)
+
+PAYPAL_ME_USERNAME is only your live paypal.me name (e.g. EthanCiuffreda),
+NOT a sandbox @business.example.com email.
+
+You must NOT use your real PayPal email/password in the popup when PAYPAL_MODE=sandbox.
+
+USE A FAKE SANDBOX BUYER
+------------------------
+1. https://developer.paypal.com/dashboard/accounts
+   (or Testing Tools → Sandbox accounts)
+
+2. Under "Sandbox" find a **Personal** account (buyer), not Business.
+
+3. Click the account → you will see:
+   - Email (looks like sb-xxxx@personal.example.com)
+   - Password → click "..." or menu → **Change password** / view password
+   Set a simple password you remember (e.g. Test1234!)
+
+4. On checkout, when PayPal opens:
+   - Log in with THAT sandbox email + THAT password only
+   - Or click "Log in with a sandbox account" if you see it
+
+CREATE NEW BUYER IF OLD ONE IS BROKEN
+--------------------------------------
+Dashboard → Sandbox accounts → Create account
+Type: Personal (US or Canada)
+Set password → use that in the popup
+
+PAY WITH CARD (NO PAYPAL LOGIN)
+-------------------------------
+On the PayPal page choose "Pay with Debit or Credit Card"
+Sandbox test card (Visa):
+  Number: 4032039461762361
+  Expiry: any future date (e.g. 12/28)
+  CVV: 123
+  Name/address: anything
+
+SKIP PAYPAL FOR NOW
+-------------------
+Store → "Paid Game" ($0) → checkout → email → Complete free test order
+That tests email + redeem without sandbox login.
+
+STILL FAILING?
+--------------
+- Use http://localhost:4242/checkout.html (npm start in checkout/) not Netlify alone
+- PAYPAL_MODE=sandbox must match keys from Sandbox tab (not Live tab)
+- Allow popups for the site
+- Try Chrome incognito
+- Keys in .env must be Sandbox Client ID + Secret from same app

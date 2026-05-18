@@ -1,0 +1,1 @@
+Classic pixel-art Snake. Eat red apples, grow longer, dodge walls and yourself — beat your high score!

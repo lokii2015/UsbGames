@@ -1,0 +1,1 @@
+Pac-Man style maze chase. Eat dots, grab power pellets, outrun four ghosts — classic and speed modes.

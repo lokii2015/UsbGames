@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>UsbGames</title>
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <header class="site-header">
+      <a class="brand-mark" href="index.html" aria-label="UsbGames — Home">
+        <img
+          class="brand-logo brand-logo--header"
+          src="logo.svg"
+          width="52"
+          height="18"
+          alt=""
+        />
+      </a>
+      <nav>
+        <a href="index.html" aria-current="page">Home</a>
+        <a href="games.html">Games</a>
+        <a href="store.html">Store</a>
+        <a href="faq.html">FAQ</a>
+        <a href="download.html">Download</a>
+      </nav>
+    </header>
+    <main class="container">
+      <div class="home-hero">
+        <div class="hero-title">
+          <img
+            class="brand-logo brand-logo--hero"
+            src="logo.svg"
+            width="104"
+            height="36"
+            alt=""
+            aria-hidden="true"
+          />
+          <h1 class="title site-name">UsbGames</h1>
+        </div>
+        <div class="menu menu--hero">
+          <a class="button" href="UsbGames-Launcher.zip" download>Download Launcher</a>
+          <a class="button" href="games.html">Browse Games</a>
+        </div>
+        <p class="slogan-large slogan-large--hero">
+          Portable games you can carry on a USB and play anywhere.
+        </p>
+      </div>
+      <section class="home-howto" aria-label="How to use UsbGames">
+        <h2 class="home-howto-title">How to use UsbGames</h2>
+        <p class="home-howto-lead">
+          Put games on a USB stick and play on any Windows PC. No account. Nothing installs on the computer &mdash; everything stays on the USB.
+        </p>
+
+        <ol class="steps steps--home">
+          <li>
+            <strong>Step 1 &mdash; Get a USB drive and the launcher.</strong>
+            Use any USB stick. On this site, click
+            <a href="UsbGames-Launcher.zip" download>Download Launcher</a>
+            (or go to <a href="download.html">Download</a>). Save the ZIP file to your computer.
+          </li>
+          <li>
+            <strong>Step 2 &mdash; Put the launcher on the USB.</strong>
+            Unzip the file. Copy the whole <code>UsbGames</code> folder onto your USB.
+            Inside you should see <code>UsbGames.exe</code> and a folder called <code>PortableGames</code>.
+            Free games may already be in <code>PortableGames</code>.
+          </li>
+          <li>
+            <strong>Step 3 &mdash; Add more games (optional).</strong>
+            <a href="games.html">Free games</a>: download a ZIP, unzip it, and drop the game folder into
+            <code>UsbGames\PortableGames\</code> on the USB (keep the folder name, e.g. <code>Snake</code>).
+            <a href="store.html">Paid games</a>: buy on the Store, download the ZIP after checkout, then unzip into
+            <code>PortableGames</code> the same way.
+          </li>
+          <li>
+            <strong>Step 4 &mdash; Play.</strong>
+            Plug the USB into a Windows PC. Open <code>UsbGames\UsbGames.exe</code>.
+            You&rsquo;ll see your game list. Click a game to start it. You can unplug the USB and use it on another PC anytime.
+          </li>
+        </ol>
+
+        <div class="home-howto-tips">
+          <p><strong>Quick tips</strong></p>
+          <ul>
+            <li>Each game is its own folder inside <code>PortableGames</code> &mdash; don&rsquo;t mix files between games.</li>
+            <li>After adding a game, click <strong>Refresh</strong> in the launcher if it doesn&rsquo;t show up right away.</li>
+            <li>No internet needed to play once games are on the USB.</li>
+            <li>Questions? See <a href="faq.html">FAQ</a>.</li>
+          </ul>
+        </div>
+      </section>
+      <section class="home-games" aria-label="Featured games">
+        <div class="grid">
+          <article class="card">
+            <img class="card-icon" src="images/games/snake.png" width="72" height="72" alt="" />
+            <h2>Snake</h2>
+            <p class="card-desc">Classic pixel-art Snake. Eat apples, grow longer, beat your high score.</p>
+            <p class="card-meta">~16 MB</p>
+            <a class="button small" href="downloads/Snake.zip" download>Download</a>
+          </article>
+          <article class="card">
+            <img class="card-icon" src="images/games/tictactoe.png" width="72" height="72" alt="" />
+            <h2>Tic-Tac-Toe</h2>
+            <p class="card-desc">Retro 3&times;3 vs medium AI or local two-player. Track wins and draws.</p>
+            <p class="card-meta">~16 MB</p>
+            <a class="button small" href="downloads/TicTacToe.zip" download>Download</a>
+          </article>
+          <article class="card">
+            <img class="card-icon" src="images/games/pixelflap.png" width="72" height="72" alt="" />
+            <h2>Pixel Flap</h2>
+            <p class="card-desc">Endless flap arcade. Dodge pipes, chase your high score.</p>
+            <p class="card-meta">~16 MB</p>
+            <a class="button small" href="downloads/PixelFlap.zip" download>Download</a>
+          </article>
+          <article class="card">
+            <img class="card-icon" src="images/games/brickbreaker.png" width="72" height="72" alt="" />
+            <h2>Brick Breaker</h2>
+            <p class="card-desc">Paddle &amp; ball arcade. Clear bricks, beat levels, chase your high score.</p>
+            <p class="card-meta">~16 MB</p>
+            <a class="button small" href="downloads/BrickBreaker.zip" download>Download</a>
+          </article>
+          <article class="card">
+            <img class="card-icon" src="images/games/spacecommand.png" width="72" height="72" alt="" />
+            <h2>Space Command</h2>
+            <p class="card-desc">Blast enemy waves, dodge lasers, grab power-ups. Your flagship free shooter.</p>
+            <p class="card-meta">~16 MB</p>
+            <a class="button small" href="downloads/SpaceCommand.zip" download>Download</a>
+          </article>
+          <article class="card">
+            <img class="card-icon" src="images/games/memorymatch.png" width="72" height="72" alt="" />
+            <h2>Memory Match</h2>
+            <p class="card-desc">Flip cards, match pairs. Three grid sizes — beat your best time.</p>
+            <p class="card-meta">~16 MB</p>
+            <a class="button small" href="downloads/MemoryMatch.zip" download>Download</a>
+          </article>
+        </div>
+      </section>
+    </main>
+    <footer class="site-footer">
+      <nav class="site-footer-nav" aria-label="Legal">
+        <a href="terms.html">Terms</a>
+        <a href="privacy.html">Privacy</a>
+        <a href="refund.html">Refunds</a>
+      </nav>
+      <p class="site-footer-copy">© 2026 UsbGames. All rights reserved. Founded by Ethan Ciuffreda</p>
+    </footer>
+  </body>
+</html>

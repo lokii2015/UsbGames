@@ -1,0 +1,115 @@
+UsbGames — PayPal then Render (step by step)
+============================================
+
+PART 1 — PayPal (about 10 minutes)
+----------------------------------
+
+1. Open https://developer.paypal.com and log in (same account as paypal.me/EthanCiuffreda).
+
+2. Top menu: Apps & Credentials.
+
+3. Open the **Sandbox** tab (for testing — no real money).
+
+4. Under "REST API apps" click **Create App** (name it UsbGames).
+
+5. Copy:
+   - Client ID
+   - Secret (click Show)
+
+6. Paste into checkout/.env on your PC:
+
+   PAYPAL_CLIENT_ID=paste_client_id_here
+   PAYPAL_CLIENT_SECRET=paste_secret_here
+   PAYPAL_MODE=sandbox
+
+7. Save .env.
+
+8. Test on your PC:
+   cd checkout
+   npm start
+   Open http://localhost:4242/checkout.html
+   Add "Paid Game" ($0) or a cheap item → enter email → pay with PayPal sandbox.
+
+9. Sandbox test buyer (PayPal provides fake accounts):
+   Developer Dashboard → Sandbox → Accounts
+   Use a "Personal" sandbox buyer email + password when PayPal popup asks you to log in.
+   You do NOT need money in your real PayPal.
+
+10. When ready for REAL sales:
+    Apps & Credentials → **Live** tab → create app → new Client ID + Secret
+    PAYPAL_MODE=live
+    Use Live keys in .env and on Render.
+
+
+PART 2 — Render (needs GitHub once)
+-----------------------------------
+
+Render cannot upload a folder from your desktop. You connect a GitHub repo.
+
+A) Put code on GitHub (one time)
+   - github.com → New repository (private is fine) → name e.g. UsbGamesWeb
+   - On your PC in PowerShell:
+
+     cd C:\Users\ethan\Desktop\UsbGamesWeb
+     git init
+     git add .
+     git commit -m "UsbGames site and checkout"
+     git branch -M main
+     git remote add origin https://github.com/YOURUSERNAME/YOURREPO.git
+     git push -u origin main
+
+   - Do NOT commit checkout/.env (it should stay local only).
+
+B) Create Render service
+   1. https://dashboard.render.com → Sign up → connect GitHub
+   2. New + → Web Service → pick your repo
+   3. Settings:
+      Name: usbgames-checkout
+      Root Directory: checkout
+      Runtime: Node
+      Build Command: npm install
+      Start Command: npm start
+      Plan: Free
+
+   4. Environment → Add every variable from checkout/.env EXCEPT do not copy PORT if Render sets it.
+      Required:
+        PAYPAL_CLIENT_ID
+        PAYPAL_CLIENT_SECRET
+        PAYPAL_MODE=sandbox
+        DOWNLOAD_SIGNING_SECRET
+        SITE_URL=https://usbgames.netlify.app
+        RESEND_API_KEY
+        RESEND_FROM_NAME=UsbGames
+        RESEND_FROM_EMAIL=onboarding@resend.dev
+        SUPPORT_EMAIL=EthanCiuffreda12@gmail.com
+        FAQ_ADMIN_CODE=5394
+        CODE_TTL_HOURS=48
+
+   5. Create Web Service → wait until Live.
+   6. Copy URL e.g. https://usbgames-checkout.onrender.com
+
+C) Game zip files on Render
+   - checkout/downloads/*.zip must be in GitHub (or Render has nothing to send).
+   - If zips are huge, use Git LFS or a smaller test zip first.
+
+D) Connect Netlify to Render
+   1. Edit netlify.toml in your project — uncomment the redirect block:
+      [[redirects]]
+        from = "/api/*"
+        to = "https://YOUR-RENDER-URL.onrender.com/api/:splat"
+        status = 200
+        force = true
+   2. Redeploy Netlify (drag folder or trigger deploy).
+
+E) PayPal webhook on Render (optional backup for email codes)
+   1. developer.paypal.com → your app → Webhooks → Add webhook
+   2. URL: https://YOUR-RENDER-URL.onrender.com/api/paypal/webhook
+   3. Events: Checkout order approved, Payment capture completed
+   4. Copy Webhook ID → PAYPAL_WEBHOOK_ID on Render → redeploy
+
+
+PART 3 — Quick checks
+---------------------
+- https://YOUR-RENDER-URL.onrender.com/api/health  → should show paypal: true, emailBot: true
+- https://usbgames.netlify.app/checkout.html       → PayPal buttons load (not "API unreachable")
+- Pay → email with code → redeem.html

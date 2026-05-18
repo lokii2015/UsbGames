@@ -1,0 +1,14 @@
+{
+  "games_played": 1,
+  "games_won": 1,
+  "best_moves": {
+    "easy": 0,
+    "medium": 0,
+    "hard": 29
+  },
+  "best_time": {
+    "easy": 0.0,
+    "medium": 0.0,
+    "hard": 53.8
+  }
+}

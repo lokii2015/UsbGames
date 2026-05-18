@@ -1,0 +1,6 @@
+{
+  "name": "Snake",
+  "description": "Classic pixel-art Snake. Eat red apples, grow longer, dodge walls and yourself — beat your high score!",
+  "version": "1.0.0",
+  "author": "UsbGames"
+}

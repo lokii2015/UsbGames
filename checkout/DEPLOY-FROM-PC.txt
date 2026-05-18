@@ -1,0 +1,37 @@
+Deploy checkout bot FROM YOUR PC (no GitHub required)
+====================================================
+
+Render.com only connects to GitHub/GitLab — it cannot upload a folder from your desktop.
+
+Use ONE of these:
+
+OPTION A — Railway (easiest folder upload from PC)
+------------------------------------------------
+1. Install: npm install -g @railway/cli
+2. Open PowerShell:
+   cd C:\Users\ethan\Desktop\UsbGamesWeb\checkout
+   railway login
+   railway init
+   railway up
+3. Railway dashboard → Variables → paste everything from checkout/.env
+4. Copy your Railway URL (e.g. https://usbgames-checkout-production.up.railway.app)
+5. In netlify.toml uncomment the redirect and use that URL instead of Render
+
+OPTION B — One-time GitHub (then Render)
+----------------------------------------
+1. Create a private repo on github.com (empty)
+2. On PC, in UsbGamesWeb folder:
+   git init
+   git add .
+   git commit -m "UsbGames"
+   git remote add origin https://github.com/YOURUSER/YOURREPO.git
+   git push -u origin main
+3. Render → New Web Service → connect repo → Root Directory: checkout
+4. Add env vars from .env in Render dashboard
+
+OPTION C — Keep testing on your PC only
+---------------------------------------
+   npm start in checkout/
+   Use ngrok to expose localhost for PayPal webhooks (advanced)
+
+After deploy: set all .env vars on the host, upload zips in checkout/downloads/
