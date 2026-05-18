@@ -5,6 +5,7 @@ const nodemailer = require("nodemailer");
 const { Resend } = require("resend");
 const { SUPPORT_EMAIL, redeemSupportHtml, redeemSupportText } = require("./support");
 const { publicSiteUrl } = require("./site-url");
+const brand = require("./email-brand");
 let resendClient = null;
 
 function hasResend() {
@@ -61,22 +62,30 @@ function transporter() {
   });
 }
 
+function finalizeEmail(siteUrl, innerHtml, subject, text) {
+  const useCid = brand.hasInlineLogo();
+  const attachments = useCid ? [brand.inlineLogoAttachment()].filter(Boolean) : [];
+  return {
+    subject,
+    html: brand.wrapEmailBody(siteUrl, innerHtml, useCid),
+    text,
+    attachments,
+  };
+}
+
 function buildMessages({ code, productNames, redeemUrl, siteUrl }) {
   const games =
     productNames && productNames.length ? productNames.join(", ") : "your purchase";
 
-  const html = `<!DOCTYPE html>
-<html><body style="font-family:sans-serif;line-height:1.5;color:#111">
-  <h2>Thanks for your UsbGames purchase</h2>
-  <p>You bought: <strong>${escapeHtml(games)}</strong></p>
-  <p>Your redemption code:</p>
-  <p style="font-size:1.25rem;font-weight:bold;letter-spacing:0.05em">${escapeHtml(code)}</p>
-  <p><a href="${escapeHtml(redeemUrl)}">Redeem your code</a> — use the same Gmail you entered at checkout.</p>
-  <p style="color:#666;font-size:0.9rem">Unzip downloads into <code>UsbGames\\PortableGames\\</code> on your USB.</p>
-  ${redeemSupportHtml(siteUrl)}
-  <p style="color:#666;font-size:0.85rem;margin-top:1rem">Didn&rsquo;t get this email? Email <a href="mailto:${escapeHtml(SUPPORT_EMAIL)}">${escapeHtml(SUPPORT_EMAIL)}</a> with your PayPal receipt.</p>
-  <p style="color:#666;font-size:0.85rem"><a href="${escapeHtml(siteUrl)}">${escapeHtml(siteUrl)}</a></p>
-</body></html>`;
+  const inner =
+    `<h2 style="margin:0 0 16px;font-size:1.35rem;color:#111">Thanks for your UsbGames purchase</h2>` +
+    `<p>You bought: <strong>${escapeHtml(games)}</strong></p>` +
+    `<p>Your redemption code:</p>` +
+    `<p style="font-size:1.25rem;font-weight:bold;letter-spacing:0.05em;margin:12px 0">${escapeHtml(code)}</p>` +
+    `<p><a href="${escapeHtml(redeemUrl)}" style="color:#cc0000;font-weight:600">Redeem your code</a> — use the same Gmail you entered at checkout.</p>` +
+    `<p style="color:#666;font-size:0.9rem">Unzip downloads into <code>UsbGames\\PortableGames\\</code> on your USB.</p>` +
+    redeemSupportHtml(siteUrl) +
+    `<p style="color:#666;font-size:0.85rem;margin-top:1rem">Didn&rsquo;t get this email? Email <a href="mailto:${escapeHtml(SUPPORT_EMAIL)}">${escapeHtml(SUPPORT_EMAIL)}</a> with your PayPal receipt.</p>`;
 
   const text = `Thanks for your UsbGames purchase (${games}).
 
@@ -89,11 +98,7 @@ ${redeemSupportText(siteUrl)}
 
 — UsbGames`;
 
-  return {
-    subject: `UsbGames code: ${code}`,
-    html,
-    text,
-  };
+  return finalizeEmail(siteUrl, inner, `UsbGames code: ${code}`, text);
 }
 
 function buildGiftMessages({
@@ -115,20 +120,17 @@ function buildGiftMessages({
     ? `\nMessage from your gift giver:\n${giftMessage}\n`
     : "";
 
-  const html = `<!DOCTYPE html>
-<html><body style="font-family:sans-serif;line-height:1.5;color:#111">
-  <h2>You received a UsbGames gift</h2>
-  <p><strong>${from}</strong> bought you: <strong>${escapeHtml(games)}</strong></p>
-  ${msgBlock}
-  <p style="font-size:1.05rem">This is a gift from <strong>${from}</strong> — remember to say <strong>thank you</strong> to them.</p>
-  <p>Your redemption code:</p>
-  <p style="font-size:1.25rem;font-weight:bold;letter-spacing:0.05em">${escapeHtml(code)}</p>
-  <p style="color:#555;font-size:0.9rem">Gift codes start with <strong>USB-G</strong> (e.g. USB-GXXXX-XXXX).</p>
-  <p><a href="${escapeHtml(redeemUrl)}">Redeem your gift</a> — use the <strong>same email this message was sent to</strong> (not ${from}&rsquo;s).</p>
-  <p style="color:#666;font-size:0.9rem">Unzip downloads into <code>UsbGames\\PortableGames\\</code> on your USB.</p>
-  ${redeemSupportHtml(siteUrl)}
-  <p style="color:#666;font-size:0.85rem"><a href="${escapeHtml(siteUrl)}">${escapeHtml(siteUrl)}</a></p>
-</body></html>`;
+  const inner =
+    `<h2 style="margin:0 0 16px;font-size:1.35rem;color:#111">You received a UsbGames gift</h2>` +
+    `<p><strong>${from}</strong> bought you: <strong>${escapeHtml(games)}</strong></p>` +
+    msgBlock +
+    `<p style="font-size:1.05rem">This is a gift from <strong>${from}</strong> — remember to say <strong>thank you</strong> to them.</p>` +
+    `<p>Your redemption code:</p>` +
+    `<p style="font-size:1.25rem;font-weight:bold;letter-spacing:0.05em;margin:12px 0">${escapeHtml(code)}</p>` +
+    `<p style="color:#555;font-size:0.9rem">Gift codes start with <strong>USB-G</strong> (e.g. USB-GXXXX-XXXX).</p>` +
+    `<p><a href="${escapeHtml(redeemUrl)}" style="color:#cc0000;font-weight:600">Redeem your gift</a> — use the <strong>same email this message was sent to</strong> (not ${from}&rsquo;s).</p>` +
+    `<p style="color:#666;font-size:0.9rem">Unzip downloads into <code>UsbGames\\PortableGames\\</code> on your USB.</p>` +
+    redeemSupportHtml(siteUrl);
 
   const text = `You received a UsbGames gift from ${fromEmail}.
 
@@ -146,21 +148,30 @@ ${redeemSupportText(siteUrl)}
 
 — UsbGames`;
 
-  return {
-    subject: `UsbGames gift for you — code ${code}`,
-    html,
-    text,
-  };
+  return finalizeEmail(
+    siteUrl,
+    inner,
+    `UsbGames gift for you — code ${code}`,
+    text
+  );
 }
 
 async function sendViaResend(to, messages) {
-  const { data, error } = await getResend().emails.send({
+  const payload = {
     from: resendFrom(),
     to: normalizeTo(to),
     subject: messages.subject,
     html: messages.html,
     text: messages.text,
-  });
+  };
+  if (messages.attachments?.length) {
+    payload.attachments = messages.attachments.map((a) => ({
+      filename: a.filename,
+      content: a.content,
+      content_id: a.contentId,
+    }));
+  }
+  const { data, error } = await getResend().emails.send(payload);
 
   if (error) {
     throw new Error(error.message || JSON.stringify(error));
@@ -171,13 +182,21 @@ async function sendViaResend(to, messages) {
 async function sendViaSmtp(to, messages) {
   const from =
     process.env.EMAIL_FROM || `UsbGames <${process.env.SMTP_USER || "noreply@usbgames.local"}>`;
-  await transporter().sendMail({
+  const mail = {
     from,
     to,
     subject: messages.subject,
     text: messages.text,
     html: messages.html,
-  });
+  };
+  if (messages.attachments?.length) {
+    mail.attachments = messages.attachments.map((a) => ({
+      filename: a.filename,
+      content: Buffer.from(a.content, "base64"),
+      cid: a.contentId,
+    }));
+  }
+  await transporter().sendMail(mail);
   return { sent: true, provider: "smtp" };
 }
 
@@ -234,9 +253,10 @@ async function sendTestEmail({ to, siteUrl }) {
   const exampleCode = "USB-XXXX-XXXX";
   const target = normalizeTo(to || SUPPORT_EMAIL);
 
-  const html = `<p>UsbGames bot test — if you see this, email works.</p>
-<p>Example code shape: <strong>${exampleCode}</strong> (not valid for redeem).</p>
-<p>After a real purchase, redeem at ${escapeHtml(site)}/redeem.html</p>`;
+  const inner =
+    `<p>UsbGames bot test — if you see this, email works.</p>` +
+    `<p>Example code shape: <strong>${exampleCode}</strong> (not valid for redeem).</p>` +
+    `<p>After a real purchase, redeem at <a href="${escapeHtml(site)}/redeem.html">${escapeHtml(site)}/redeem.html</a></p>`;
 
   const text = `UsbGames bot test. Example code: ${exampleCode} (not valid). Redeem page: ${site}/redeem.html`;
 
@@ -245,7 +265,12 @@ async function sendTestEmail({ to, siteUrl }) {
     return { sent: false, logged: true, to: target };
   }
 
-  const messages = { subject: "UsbGames test email (bot OK)", html, text };
+  const messages = finalizeEmail(
+    site,
+    inner,
+    "UsbGames test email (bot OK)",
+    text
+  );
   if (hasResend()) {
     await sendViaResend(target, messages);
   } else {
@@ -256,14 +281,11 @@ async function sendTestEmail({ to, siteUrl }) {
 }
 
 function buildPurchaseHistoryMessages({ historyUrl, siteUrl, expiresHours }) {
-  const html = `<!DOCTYPE html>
-<html><body style="font-family:sans-serif;line-height:1.5;color:#111">
-  <h2>Your UsbGames purchase history</h2>
-  <p>Tap the link below to view what you bought, redemption status, and download links for redeemed orders.</p>
-  <p><a href="${escapeHtml(historyUrl)}">View purchase history</a></p>
-  <p style="color:#666;font-size:0.9rem">This link expires in about ${expiresHours} hours. If you didn&rsquo;t request it, you can ignore this email.</p>
-  <p style="color:#666;font-size:0.85rem"><a href="${escapeHtml(siteUrl)}">${escapeHtml(siteUrl)}</a></p>
-</body></html>`;
+  const inner =
+    `<h2 style="margin:0 0 16px;font-size:1.35rem;color:#111">Your UsbGames purchase history</h2>` +
+    `<p>Tap the link below to view what you bought, redemption status, and download links for redeemed orders.</p>` +
+    `<p><a href="${escapeHtml(historyUrl)}" style="color:#cc0000;font-weight:600">View purchase history</a></p>` +
+    `<p style="color:#666;font-size:0.9rem">This link expires in about ${expiresHours} hours. If you didn&rsquo;t request it, you can ignore this email.</p>`;
 
   const text = `UsbGames purchase history
 
@@ -273,11 +295,12 @@ This link expires in about ${expiresHours} hours.
 
 — UsbGames`;
 
-  return {
-    subject: "UsbGames — your purchase history link",
-    html,
-    text,
-  };
+  return finalizeEmail(
+    siteUrl,
+    inner,
+    "UsbGames — your purchase history link",
+    text
+  );
 }
 
 async function sendPurchaseHistoryLink({ to, historyUrl, siteUrl, expiresHours }) {
