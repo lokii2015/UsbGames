@@ -193,14 +193,19 @@ app.get("/api/product/:productId", (req, res) => {
   });
 });
 
-/** Use browser origin when testing on localhost; else SITE_URL from .env */
+/** Prefer SITE_URL from .env; allow localhost origin for dev only. */
 function resolveSiteUrl(body) {
   const raw = body?.siteUrl || body?.returnOrigin;
   if (raw && typeof raw === "string") {
     try {
       const u = new URL(raw.trim());
       if (u.protocol === "http:" || u.protocol === "https:") {
-        return u.origin;
+        const host = u.hostname.toLowerCase();
+        if (host.endsWith(".netlify.app")) return SITE_URL;
+        if (host === "localhost" || host === "127.0.0.1") return u.origin;
+        if (host.endsWith(".onrender.com") && SITE_URL.includes(".onrender.com")) {
+          return u.origin;
+        }
       }
     } catch {
       /* ignore */

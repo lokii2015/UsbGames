@@ -1,23 +1,11 @@
-# UsbGames on Netlify — static site here; checkout API on Render (or similar).
-# See checkout/DEPLOY-NETLIFY.txt
+# Legacy Netlify deploy — entire site moved to Render.
+# Anyone visiting the old Netlify URL is sent to Render.
 
 [build]
   publish = "."
 
 [[redirects]]
-  from = "/api/*"
-  to = "https://usbgames.onrender.com/api/:splat"
-  status = 200
+  from = "/*"
+  to = "https://usbgames.onrender.com/:splat"
+  status = 301
   force = true
-
-# Block direct access to secrets and game zips (downloads only via /api/download after payment)
-[[redirects]]
-  from = "/checkout/.env"
-  to = "/404.html"
-  status = 404
-  force = true
-
-[[redirects]]
-  from = "/checkout/downloads/*"
-  to = "/store.html"
-  status = 302

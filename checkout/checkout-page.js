@@ -78,10 +78,19 @@
     });
   }
 
+  function checkoutSiteUrl() {
+    if (typeof window.USBGAMES_SITE_URL === "string" && window.USBGAMES_SITE_URL) {
+      return window.USBGAMES_SITE_URL;
+    }
+    const host = (location.hostname || "").toLowerCase();
+    if (host.endsWith(".netlify.app")) return "https://usbgames.onrender.com";
+    return location.origin;
+  }
+
   function cartPayload() {
     const base = {
       items: cart.getIds(),
-      siteUrl: window.location.origin,
+      siteUrl: checkoutSiteUrl(),
       checkoutMode,
     };
     if (checkoutMode === "gift") {
@@ -245,7 +254,7 @@
         ok: false,
         data: {
           error:
-            "Checkout API unreachable. Use https://usbgames.onrender.com or run npm start in checkout/ locally.",
+            "Checkout API unreachable. Open https://usbgames.onrender.com or run npm start in checkout/ locally.",
         },
       };
     }
@@ -363,7 +372,7 @@
     if (!config?.paypalClientId) {
       serverHint.hidden = false;
       serverHint.textContent =
-        "Checkout API not connected. Run npm start in checkout/ (localhost) or deploy API + Netlify proxy.";
+        "Checkout API not connected. Use https://usbgames.onrender.com or run npm start in checkout/ locally.";
       document.getElementById("paypal-button-container").innerHTML =
         '<p class="checkout-panel-hint">Start the checkout server to show payment buttons.</p>';
       return;
