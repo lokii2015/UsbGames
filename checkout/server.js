@@ -602,7 +602,6 @@ const PREMIUM_ZIPS = new Set([
   "BlockStackDX.zip",
   "PixelChomp.zip",
   "BlackJack.zip",
-  "PaidGame.zip",
   "UsbGames-StarterPack.zip",
   "UsbGames-RetroArcadePack.zip",
 ]);

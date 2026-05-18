@@ -69,13 +69,6 @@
       amount: 599,
       currency: STORE_CURRENCY,
     },
-    paid_game: {
-      id: "paid_game",
-      name: "Paid Game (download test)",
-      description: "$0.00 test — confirms checkout download works",
-      amount: 0,
-      currency: STORE_CURRENCY,
-    },
     starter_pack: {
       id: "starter_pack",
       name: "UsbGames Starter Pack",

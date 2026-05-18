@@ -79,14 +79,6 @@ const PRODUCTS = {
     currency: STORE_CURRENCY,
     files: ["BlackJack.zip"],
   },
-  paid_game: {
-    id: "paid_game",
-    name: "Paid Game (download test)",
-    description: "$0.00 test — confirms checkout download works",
-    amount: 0,
-    currency: STORE_CURRENCY,
-    files: ["PaidGame.zip"],
-  },
   starter_pack: {
     id: "starter_pack",
     name: "UsbGames Starter Pack",
