@@ -792,6 +792,18 @@ button.button:disabled {
   margin-bottom: 1rem;
 }
 
+.checkout-textarea {
+  width: 100%;
+  padding: 0.65rem 0.75rem;
+  border: 1px solid #3a5a55;
+  border-radius: 8px;
+  background: #0f1419;
+  color: #eee;
+  font: inherit;
+  resize: vertical;
+  min-height: 4.5rem;
+}
+
 .checkout-field-label {
   display: block;
   font-size: 0.85rem;

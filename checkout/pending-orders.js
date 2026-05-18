@@ -20,13 +20,19 @@ function save(data) {
   fs.writeFileSync(FILE, JSON.stringify(data, null, 2));
 }
 
-function set(orderId, { email, productIds }) {
+function set(orderId, { email, productIds, isGift, buyerEmail, giftMessage }) {
   const all = load();
-  all[orderId] = {
+  const row = {
     email: String(email).trim().toLowerCase(),
     productIds: [...productIds],
     at: new Date().toISOString(),
   };
+  if (isGift) {
+    row.isGift = true;
+    row.buyerEmail = String(buyerEmail || "").trim().toLowerCase();
+    row.giftMessage = String(giftMessage || "").trim().slice(0, 500);
+  }
+  all[orderId] = row;
   save(all);
 }
 

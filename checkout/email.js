@@ -99,6 +99,64 @@ ${redeemSupportText(siteUrl)}
   };
 }
 
+function buildGiftMessages({
+  code,
+  productNames,
+  redeemUrl,
+  siteUrl,
+  fromEmail,
+  giftMessage,
+}) {
+  const games =
+    productNames && productNames.length ? productNames.join(", ") : "UsbGames";
+  const from = escapeHtml(fromEmail);
+  const msgBlock = giftMessage
+    ? `<p style="background:#f4f8f7;border-left:4px solid #64e0d0;padding:0.75rem 1rem;margin:1rem 0">` +
+      `<strong>Message from your gift giver:</strong><br>${escapeHtml(giftMessage)}</p>`
+    : "";
+  const msgText = giftMessage
+    ? `\nMessage from your gift giver:\n${giftMessage}\n`
+    : "";
+
+  const html = `<!DOCTYPE html>
+<html><body style="font-family:sans-serif;line-height:1.5;color:#111">
+  <h2>You received a UsbGames gift</h2>
+  <p><strong>${from}</strong> bought you: <strong>${escapeHtml(games)}</strong></p>
+  ${msgBlock}
+  <p style="font-size:1.05rem">This is a gift from <strong>${from}</strong> — remember to say <strong>thank you</strong> to them.</p>
+  <p>Your redemption code:</p>
+  <p style="font-size:1.25rem;font-weight:bold;letter-spacing:0.05em">${escapeHtml(code)}</p>
+  <p><a href="${escapeHtml(redeemUrl)}">Redeem your gift</a> — use the <strong>same email this message was sent to</strong> (not ${from}&rsquo;s).</p>
+  <p style="color:#c00;font-size:0.9rem"><strong>This code expires in 48 hours.</strong> Redeem soon to download your games.</p>
+  <p style="color:#666;font-size:0.9rem">Unzip downloads into <code>UsbGames\\PortableGames\\</code> on your USB.</p>
+  ${redeemSupportHtml(siteUrl)}
+  <p style="color:#666;font-size:0.85rem"><a href="${escapeHtml(siteUrl)}">${escapeHtml(siteUrl)}</a></p>
+</body></html>`;
+
+  const text = `You received a UsbGames gift from ${fromEmail}.
+
+They bought: ${games}
+${msgText}
+This is a gift from ${fromEmail} — remember to say thank you to them.
+
+Your code: ${code}
+
+Redeem: ${redeemUrl}
+Use the email address this message was sent to (not the giver's email).
+
+This code expires in 48 hours.
+
+${redeemSupportText(siteUrl)}
+
+— UsbGames`;
+
+  return {
+    subject: `UsbGames gift for you — code ${code}`,
+    html,
+    text,
+  };
+}
+
 async function sendViaResend(to, messages) {
   const { data, error } = await getResend().emails.send({
     from: resendFrom(),
@@ -127,8 +185,26 @@ async function sendViaSmtp(to, messages) {
   return { sent: true, provider: "smtp" };
 }
 
-async function sendRedeemCode({ to, code, productNames, redeemUrl, siteUrl }) {
-  const messages = buildMessages({ code, productNames, redeemUrl, siteUrl });
+async function sendRedeemCode({
+  to,
+  code,
+  productNames,
+  redeemUrl,
+  siteUrl,
+  giftFromEmail,
+  giftMessage,
+}) {
+  const messages =
+    giftFromEmail
+      ? buildGiftMessages({
+          code,
+          productNames,
+          redeemUrl,
+          siteUrl,
+          fromEmail: giftFromEmail,
+          giftMessage: giftMessage || "",
+        })
+      : buildMessages({ code, productNames, redeemUrl, siteUrl });
 
   if (!isConfigured()) {
     console.log("\n📧 EMAIL NOT CONFIGURED — redemption code for", to);

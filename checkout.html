@@ -51,20 +51,79 @@
         </section>
 
         <section class="checkout-pay card">
-          <h2 class="checkout-summary-title">Your email</h2>
-          <label class="checkout-field">
-            <span class="checkout-field-label">Gmail / email (for your redemption code)</span>
-            <input
-              type="email"
-              id="checkout-email"
-              required
-              autocomplete="email"
-              placeholder="you@gmail.com"
-            />
-          </label>
+          <h2 class="checkout-summary-title">Email</h2>
+          <div class="checkout-methods" role="tablist" aria-label="Checkout type">
+            <button
+              type="button"
+              class="checkout-tab checkout-tab--active"
+              data-checkout-mode="self"
+              role="tab"
+              aria-selected="true"
+            >
+              For me
+            </button>
+            <button
+              type="button"
+              class="checkout-tab"
+              data-checkout-mode="gift"
+              role="tab"
+              aria-selected="false"
+            >
+              Send as a gift
+            </button>
+          </div>
+
+          <div id="panel-checkout-self" class="checkout-panel" role="tabpanel">
+            <label class="checkout-field">
+              <span class="checkout-field-label">Gmail / email (for your redemption code)</span>
+              <input
+                type="email"
+                id="checkout-email"
+                autocomplete="email"
+                placeholder="you@gmail.com"
+              />
+            </label>
+            <p class="checkout-panel-hint">
+              After payment we email a one-time code (valid <strong>48 hours</strong>). Redeem on
+              <a href="redeem.html">Redeem</a> to download.
+            </p>
+          </div>
+
+          <div id="panel-checkout-gift" class="checkout-panel" role="tabpanel" hidden>
+            <label class="checkout-field">
+              <span class="checkout-field-label">Their email (gift recipient — code goes here only)</span>
+              <input
+                type="email"
+                id="gift-recipient-email"
+                autocomplete="email"
+                placeholder="friend@gmail.com"
+              />
+            </label>
+            <label class="checkout-field">
+              <span class="checkout-field-label">Your email (you pay — receipt &amp; order updates)</span>
+              <input
+                type="email"
+                id="gift-buyer-email"
+                autocomplete="email"
+                placeholder="you@gmail.com"
+              />
+            </label>
+            <label class="checkout-field">
+              <span class="checkout-field-label">Additional message (optional)</span>
+              <textarea
+                id="gift-message"
+                class="checkout-textarea"
+                rows="3"
+                maxlength="500"
+                placeholder="e.g. Happy birthday! Enjoy these games."
+              ></textarea>
+            </label>
+            <p class="checkout-panel-hint">
+              You pay; we email the code only to <strong>their</strong> address. The email will say it is a gift from you and ask them to say thank-you.
+            </p>
+          </div>
+
           <p class="checkout-panel-hint">
-            After payment we email a one-time code (valid <strong>48 hours</strong>). Redeem on
-            <a href="redeem.html">Redeem</a> to download. Codes are only created once your payment clears.
             No code within 48 hours? See <a href="refund.html">Refund Policy</a> and email
             <a href="mailto:EthanCiuffreda12@gmail.com">EthanCiuffreda12@gmail.com</a>.
           </p>

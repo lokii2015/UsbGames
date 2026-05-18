@@ -20,7 +20,15 @@ function normalizeEmail(email) {
  * @param {string} opts.email Customer Gmail from checkout
  * @param {string} opts.siteUrl
  */
-async function fulfillPaidOrder({ orderId, productIds, email, siteUrl }) {
+async function fulfillPaidOrder({
+  orderId,
+  productIds,
+  email,
+  siteUrl,
+  isGift,
+  buyerEmail,
+  giftMessage,
+}) {
   const cart = resolveCart(productIds);
   if (!cart) throw new Error("Invalid products in order");
 
@@ -42,11 +50,15 @@ async function fulfillPaidOrder({ orderId, productIds, email, siteUrl }) {
     productNames,
     redeemUrl,
     siteUrl,
+    giftFromEmail: isGift ? normalizeEmail(buyerEmail) : null,
+    giftMessage: isGift ? giftMessage : "",
   });
 
   return {
     code,
     email: normalizedEmail,
+    buyerEmail: isGift ? normalizeEmail(buyerEmail) : null,
+    isGift: Boolean(isGift),
     existing,
     emailSent: mailResult.sent,
     productNames,
@@ -72,6 +84,9 @@ async function fulfillFromPayPalOrderId(orderId, siteUrl) {
     productIds,
     email,
     siteUrl,
+    isGift: Boolean(pend?.isGift),
+    buyerEmail: pend?.buyerEmail,
+    giftMessage: pend?.giftMessage || "",
   });
 }
 

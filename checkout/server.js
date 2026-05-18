@@ -181,6 +181,34 @@ function resolveSiteUrl(body) {
   return SITE_URL;
 }
 
+function parseCheckoutEmails(body) {
+  const isGift =
+    body?.checkoutMode === "gift" || body?.gift === true || body?.isGift === true;
+  if (isGift) {
+    const recipientEmail = bot.normalizeEmail(body?.recipientEmail || body?.email);
+    const buyerEmail = bot.normalizeEmail(body?.buyerEmail);
+    const giftMessage = String(body?.giftMessage || "").trim().slice(0, 500);
+    if (!recipientEmail) {
+      return { error: "Enter the recipient email for this gift." };
+    }
+    if (!buyerEmail) {
+      return { error: "Enter your email (you are paying for this gift)." };
+    }
+    if (recipientEmail === buyerEmail) {
+      return { error: "Recipient email and your email must be different." };
+    }
+    return {
+      isGift: true,
+      email: recipientEmail,
+      buyerEmail,
+      giftMessage,
+    };
+  }
+  const email = bot.normalizeEmail(body?.email);
+  if (!email) return { error: "Enter your Gmail / email before paying." };
+  return { isGift: false, email, buyerEmail: null, giftMessage: "" };
+}
+
 function parseCartBody(body) {
   const items = body?.items || body?.productIds;
   if (Array.isArray(items) && items.length > 0) {
@@ -276,15 +304,21 @@ app.post("/api/paypal/create-order", async (req, res) => {
   const cart = parseCartBody(req.body);
   if (!cart) return res.status(400).json({ error: "Cart is empty or invalid" });
 
-  const email = bot.normalizeEmail(req.body?.email);
-  if (!email) {
-    return res.status(400).json({ error: "Enter your Gmail / email before paying." });
+  const checkout = parseCheckoutEmails(req.body);
+  if (checkout.error) {
+    return res.status(400).json({ error: checkout.error });
   }
 
   try {
     const siteUrl = resolveSiteUrl(req.body);
     const order = await paypal.createOrder(cart, siteUrl);
-    pending.set(order.id, { email, productIds: cart.productIds });
+    pending.set(order.id, {
+      email: checkout.email,
+      productIds: cart.productIds,
+      isGift: checkout.isGift,
+      buyerEmail: checkout.buyerEmail,
+      giftMessage: checkout.giftMessage,
+    });
     res.json({
       orderId: order.id,
       approveUrl: paypal.approveUrlFromOrder(order),
@@ -310,17 +344,29 @@ app.post("/api/paypal/capture-order", async (req, res) => {
     if (productIds.length && paypal.orderIsPaid(captured)) {
       botResult = await bot.fulfillFromPayPalOrderId(orderId, SITE_URL);
     }
-    const email =
-      botResult?.email || pending.get(orderId)?.email || paypal.payerEmail(captured);
+    const pend = pending.get(orderId);
+    const recipientEmail =
+      botResult?.email || pend?.email || paypal.payerEmail(captured);
+    const completeEmail =
+      botResult?.isGift && botResult?.buyerEmail
+        ? botResult.buyerEmail
+        : recipientEmail;
+    let completeUrl = completeEmail
+      ? `${SITE_URL}/order-complete.html?email=${encodeURIComponent(completeEmail)}`
+      : `${SITE_URL}/order-complete.html`;
+    if (botResult?.isGift && recipientEmail) {
+      completeUrl +=
+        "&gift=1&recipient=" + encodeURIComponent(recipientEmail);
+    }
     res.json({
       orderId: captured.id,
       status: captured.status,
       productIds,
       code: botResult?.code || null,
       emailSent: botResult?.emailSent || false,
-      completeUrl: email
-        ? `${SITE_URL}/order-complete.html?email=${encodeURIComponent(email)}`
-        : `${SITE_URL}/order-complete.html`,
+      isGift: Boolean(botResult?.isGift),
+      recipientEmail: botResult?.isGift ? recipientEmail : null,
+      completeUrl,
     });
   } catch (err) {
     console.error("PayPal capture:", err);

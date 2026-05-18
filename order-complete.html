@@ -22,13 +22,18 @@
     <main class="container">
       <h1 class="title small">Payment received</h1>
       <p class="subtitle" id="complete-msg">Check your email for your redemption code.</p>
-      <div class="card">
-        <ol class="steps">
+      <div class="card" id="complete-card">
+        <ol class="steps" id="complete-steps-self">
           <li>Open the email we sent to <strong id="complete-email">your Gmail</strong>.</li>
           <li>Copy the code (looks like <strong>USB-XXXX-XXXX</strong>).</li>
           <li>
             <a class="button" href="redeem.html" id="redeem-link">Redeem code &amp; download</a>
           </li>
+        </ol>
+        <ol class="steps" id="complete-steps-gift" hidden>
+          <li>We emailed the redemption code to <strong id="complete-recipient">the recipient</strong> only — not to you.</li>
+          <li>They redeem at <a href="redeem.html">Redeem</a> using <strong>their</strong> email address.</li>
+          <li>Tell them to say <strong>thank you</strong> — the gift email includes your address.</li>
         </ol>
         <p class="games-install-hint">
           Your code expires in <strong>48 hours</strong> after purchase. Check spam if it is not in your inbox within a few minutes.
@@ -57,8 +62,16 @@
       (async function () {
         const params = new URLSearchParams(location.search);
         const email = params.get("email");
+        const recipient = params.get("recipient");
+        const isGift = params.get("gift") === "1";
         const token = params.get("token");
-        if (email) {
+        if (isGift && recipient) {
+          document.getElementById("complete-msg").textContent =
+            "Gift sent! The code was emailed to your recipient.";
+          document.getElementById("complete-steps-self").hidden = true;
+          document.getElementById("complete-steps-gift").hidden = false;
+          document.getElementById("complete-recipient").textContent = recipient;
+        } else if (email) {
           document.getElementById("complete-email").textContent = email;
           document.getElementById("redeem-link").href =
             "redeem.html?email=" + encodeURIComponent(email);

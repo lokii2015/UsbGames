@@ -115,7 +115,11 @@ function redeem(codeRaw, emailRaw) {
     };
   }
   if (row.email !== email) {
-    return { ok: false, error: "Email does not match this code. Use the Gmail from checkout." };
+    return {
+      ok: false,
+      error:
+        "Email does not match this code. Use the same email the code was sent to.",
+    };
   }
 
   row.used = true;

@@ -1,5 +1,5 @@
 /**
- * Cart checkout — PayPal Smart Buttons (PayPal + card) and $0 test orders.
+ * Cart checkout — PayPal Smart Buttons (PayPal + card), gifts, $0 test orders.
  */
 (function () {
   const cart = window.UsbGamesCart;
@@ -16,9 +16,12 @@
   const serverHint = document.getElementById("checkout-server-hint");
   const panelFree = document.getElementById("panel-free");
   const panelPaid = document.getElementById("panel-paid");
+  const panelSelf = document.getElementById("panel-checkout-self");
+  const panelGift = document.getElementById("panel-checkout-gift");
 
   let config = null;
   let paypalButtonsReady = false;
+  let checkoutMode = "self";
 
   function showError(msg) {
     errorEl.hidden = false;
@@ -30,22 +33,95 @@
     errorEl.textContent = "";
   }
 
-  function getCheckoutEmail() {
+  function isValidEmail(email) {
+    return email && /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+  }
+
+  function getSelfEmail() {
     const el = document.getElementById("checkout-email");
     return el ? el.value.trim() : "";
   }
 
+  function getGiftRecipientEmail() {
+    const el = document.getElementById("gift-recipient-email");
+    return el ? el.value.trim() : "";
+  }
+
+  function getGiftBuyerEmail() {
+    const el = document.getElementById("gift-buyer-email");
+    return el ? el.value.trim() : "";
+  }
+
+  function getGiftMessage() {
+    const el = document.getElementById("gift-message");
+    return el ? el.value.trim().slice(0, 500) : "";
+  }
+
+  function applyCheckoutModePanels() {
+    const isGift = checkoutMode === "gift";
+    if (panelSelf) panelSelf.hidden = isGift;
+    if (panelGift) panelGift.hidden = !isGift;
+  }
+
+  function setupCheckoutModeTabs() {
+    document.querySelectorAll("[data-checkout-mode]").forEach((tab) => {
+      tab.addEventListener("click", () => {
+        checkoutMode = tab.getAttribute("data-checkout-mode") || "self";
+        document.querySelectorAll("[data-checkout-mode]").forEach((t) => {
+          const on = t === tab;
+          t.classList.toggle("checkout-tab--active", on);
+          t.setAttribute("aria-selected", on ? "true" : "false");
+        });
+        applyCheckoutModePanels();
+        clearError();
+      });
+    });
+  }
+
   function cartPayload() {
-    return {
+    const base = {
       items: cart.getIds(),
-      email: getCheckoutEmail(),
       siteUrl: window.location.origin,
+      checkoutMode,
+    };
+    if (checkoutMode === "gift") {
+      return {
+        ...base,
+        gift: true,
+        recipientEmail: getGiftRecipientEmail(),
+        buyerEmail: getGiftBuyerEmail(),
+        giftMessage: getGiftMessage(),
+        email: getGiftRecipientEmail(),
+      };
+    }
+    return {
+      ...base,
+      email: getSelfEmail(),
     };
   }
 
-  function requireEmail() {
-    const email = getCheckoutEmail();
-    if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+  function requireCheckoutEmails() {
+    if (checkoutMode === "gift") {
+      const recipient = getGiftRecipientEmail();
+      const buyer = getGiftBuyerEmail();
+      if (!isValidEmail(recipient)) {
+        showError("Enter the recipient's email (who gets the code).");
+        document.getElementById("gift-recipient-email")?.focus();
+        return false;
+      }
+      if (!isValidEmail(buyer)) {
+        showError("Enter your email (you are paying for this gift).");
+        document.getElementById("gift-buyer-email")?.focus();
+        return false;
+      }
+      if (recipient.toLowerCase() === buyer.toLowerCase()) {
+        showError("Recipient and your email must be different for gifts.");
+        return false;
+      }
+      return true;
+    }
+    const email = getSelfEmail();
+    if (!isValidEmail(email)) {
       showError("Enter your Gmail / email before paying.");
       document.getElementById("checkout-email")?.focus();
       return false;
@@ -87,6 +163,7 @@
 
     const isFree = total === 0;
     applyPaymentPanels(isFree);
+    applyCheckoutModePanels();
 
     linesEl.innerHTML = "";
     lines.forEach((p) => {
@@ -127,7 +204,7 @@
   }
 
   document.getElementById("btn-free-checkout")?.addEventListener("click", async () => {
-    if (!requireEmail()) return;
+    if (!requireCheckoutEmails()) return;
     clearError();
     loadingEl.hidden = false;
     const { ok, data } = await apiFetch("/api/checkout/free-order", {
@@ -143,7 +220,7 @@
     cart.clear();
     location.href =
       data.successUrl ||
-      "/order-complete.html?email=" + encodeURIComponent(getCheckoutEmail());
+      "/order-complete.html?email=" + encodeURIComponent(getSelfEmail());
   });
 
   document.getElementById("btn-clear-cart").addEventListener("click", () => {
@@ -175,7 +252,7 @@
   }
 
   async function createPayPalOrder() {
-    if (!requireEmail()) throw new Error("Enter your email before paying.");
+    if (!requireCheckoutEmails()) throw new Error("Enter email before paying.");
     const { ok, data } = await apiFetch("/api/paypal/create-order", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
@@ -187,12 +264,17 @@
 
   async function afterPaymentSuccess(cap) {
     cart.clear();
-    const email = encodeURIComponent(getCheckoutEmail());
     if (cap.completeUrl) {
       location.href = cap.completeUrl;
       return;
     }
-    location.href = "/order-complete.html?email=" + email;
+    const email =
+      checkoutMode === "gift" ? getGiftBuyerEmail() : getSelfEmail();
+    let url = "/order-complete.html?email=" + encodeURIComponent(email);
+    if (cap.isGift && cap.recipientEmail) {
+      url += "&gift=1&recipient=" + encodeURIComponent(cap.recipientEmail);
+    }
+    location.href = url;
   }
 
   function loadPayPalSdk(clientId, currency) {
@@ -251,7 +333,7 @@
       },
       onError: (err) => {
         console.error("PayPal error", err);
-        showError("Payment could not be completed. Check your email is entered and try again.");
+        showError("Payment could not be completed. Check your emails and try again.");
       },
       onCancel: () => {
         showError("Payment cancelled.");
@@ -312,6 +394,20 @@
     });
   }
 
+  const buyerEl = document.getElementById("gift-buyer-email");
+  if (buyerEl) {
+    try {
+      const saved = localStorage.getItem("usbgames_gift_buyer_email");
+      if (saved) buyerEl.value = saved;
+    } catch (_) {}
+    buyerEl.addEventListener("change", () => {
+      try {
+        localStorage.setItem("usbgames_gift_buyer_email", buyerEl.value.trim());
+      } catch (_) {}
+    });
+  }
+
+  setupCheckoutModeTabs();
   cart.syncFromUrl();
   cart.onChange(renderCart);
   renderCart();
