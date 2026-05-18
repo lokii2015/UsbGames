@@ -17,7 +17,24 @@ function hasSmtp() {
 }
 
 function isConfigured() {
-  return hasResend() || hasSmtp();
+  return Boolean(activeProvider());
+}
+
+/** auto | resend | smtp — use smtp to send from your Gmail (Gravatar / Google profile photo). */
+function activeProvider() {
+  const pick = (process.env.EMAIL_PROVIDER || "auto").trim().toLowerCase();
+  if (pick === "smtp") return hasSmtp() ? "smtp" : null;
+  if (pick === "resend") return hasResend() ? "resend" : null;
+  if (hasResend()) return "resend";
+  if (hasSmtp()) return "smtp";
+  return null;
+}
+
+async function sendEmail(to, messages) {
+  const provider = activeProvider();
+  if (provider === "smtp") return sendViaSmtp(to, messages);
+  if (provider === "resend") return sendViaResend(to, messages);
+  throw new Error("Email not configured");
 }
 
 function getResend() {
@@ -233,10 +250,7 @@ async function sendRedeemCode({
     return { sent: false, logged: true };
   }
 
-  if (hasResend()) {
-    return sendViaResend(to, messages);
-  }
-  return sendViaSmtp(to, messages);
+  return sendEmail(to, messages);
 }
 
 function escapeHtml(s) {
@@ -271,11 +285,7 @@ async function sendTestEmail({ to, siteUrl }) {
     "UsbGames test email (bot OK)",
     text
   );
-  if (hasResend()) {
-    await sendViaResend(target, messages);
-  } else {
-    await sendViaSmtp(target, messages);
-  }
+  await sendEmail(target, messages);
   console.log("Test email sent to", target);
   return { sent: true, to: target };
 }
@@ -321,14 +331,12 @@ async function sendPurchaseHistoryLink({ to, historyUrl, siteUrl, expiresHours }
     return { sent: false, logged: true };
   }
 
-  if (hasResend()) {
-    return sendViaResend(to, messages);
-  }
-  return sendViaSmtp(to, messages);
+  return sendEmail(to, messages);
 }
 
 module.exports = {
   isConfigured,
+  activeProvider,
   hasResend,
   hasSmtp,
   sendRedeemCode,

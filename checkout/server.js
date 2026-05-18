@@ -118,6 +118,7 @@ app.get("/api/health", (_req, res) => {
     paypal: paypal.isConfigured(),
     paypalMe: paypal.PAYPAL_ME_USERNAME,
     emailBot: mail.isConfigured(),
+    emailProvider: mail.activeProvider(),
     siteUrl: SITE_URL,
     supportEmail: SUPPORT_EMAIL,
   });
@@ -708,10 +709,13 @@ app.listen(PORT, () => {
   if (!mail.isConfigured()) {
     console.warn("⚠ Email not set — codes print to server logs instead of inbox");
     console.warn("   Free: RESEND_API_KEY (resend.com) or Gmail SMTP in checkout/.env");
-  } else if (mail.hasResend()) {
-    console.log("📧 Email bot: Resend (free tier)");
   } else {
-    console.log("📧 Email bot: Gmail SMTP (free)");
+    const p = mail.activeProvider();
+    if (p === "smtp") {
+      console.log("📧 Email bot: Gmail SMTP — inbox avatar uses your Google account photo");
+    } else if (p === "resend") {
+      console.log("📧 Email bot: Resend (onboarding@resend.dev cannot use Gravatar)");
+    }
   }
   if (paypal.isConfigured() && !process.env.PAYPAL_WEBHOOK_ID) {
     console.warn("⚠ PAYPAL_WEBHOOK_ID not set — webhook bot disabled (capture still sends codes)");
