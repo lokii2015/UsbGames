@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Purchase history — UsbGames</title>
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <header class="site-header">
+      <a class="brand-mark" href="index.html" aria-label="UsbGames — Home">
+        <img class="brand-logo brand-logo--header" src="logo.svg" width="52" height="18" alt="" />
+      </a>
+      <nav>
+        <a href="index.html">Home</a>
+        <a href="games.html">Games</a>
+        <a href="store.html">Store</a>
+        <a href="checkout.html" data-cart-link>
+          Cart <span class="cart-badge" data-cart-count hidden>0</span>
+        </a>
+        <a href="faq.html">FAQ</a>
+        <a href="support.html">Support</a>
+        <a href="redeem.html">Redeem</a>
+        <a href="purchase-history.html" aria-current="page">Orders</a>
+      </nav>
+    </header>
+    <main class="container checkout-page purchase-history-page">
+      <h1 class="title small">Purchase history</h1>
+      <p class="subtitle">
+        See what you bought, when you bought it, whether you redeemed your code, and download your games again.
+      </p>
+
+      <section class="card" id="history-request">
+        <h2 class="purchase-section-title">Sign in with email</h2>
+        <p class="purchase-hint">
+          Use the same email from checkout (or the recipient email for gifts). We&rsquo;ll email you a secure link — no password.
+        </p>
+        <form class="redeem-form" id="history-request-form">
+          <label class="checkout-field">
+            <span class="checkout-field-label">Email</span>
+            <input
+              type="email"
+              id="history-email"
+              name="email"
+              required
+              autocomplete="email"
+              placeholder="you@gmail.com"
+            />
+          </label>
+          <button type="submit" class="button" id="btn-history-request">Email me my history</button>
+          <p id="history-request-msg" class="faq-success" hidden></p>
+          <p id="history-request-error" class="checkout-error" hidden></p>
+        </form>
+      </section>
+
+      <section id="history-loading" class="checkout-loading" hidden>Loading your orders…</section>
+      <p id="history-error" class="checkout-error" hidden></p>
+
+      <div id="history-list" class="purchase-history-list" hidden></div>
+      <p id="history-empty" class="games-install-hint" hidden>
+        No orders found for this email yet. After PayPal checkout you&rsquo;ll get a code by email — it will show up here too.
+      </p>
+
+      <p class="games-install-hint">
+        Need help? <a href="support.html">Support</a> ·
+        <a href="redeem.html">Redeem a code</a> ·
+        <a href="store.html">Store</a>
+      </p>
+    </main>
+    <footer class="site-footer">
+      <nav class="site-footer-nav" aria-label="Legal">
+        <a href="terms.html">Terms</a>
+        <a href="privacy.html">Privacy</a>
+        <a href="refund.html">Refunds</a>
+      </nav>
+      <p class="site-footer-copy">© 2026 UsbGames. All rights reserved. Founded by Ethan Ciuffreda</p>
+    </footer>
+    <script src="checkout/api-base.js"></script>
+    <script src="checkout/store-cart.js"></script>
+    <script src="checkout/purchase-history-page.js"></script>
+  </body>
+</html>

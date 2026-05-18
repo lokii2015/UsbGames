@@ -249,4 +249,56 @@ async function sendTestEmail({ to, siteUrl }) {
   return { sent: true, to: target };
 }
 
-module.exports = { isConfigured, hasResend, hasSmtp, sendRedeemCode, sendTestEmail };
+function buildPurchaseHistoryMessages({ historyUrl, siteUrl, expiresHours }) {
+  const html = `<!DOCTYPE html>
+<html><body style="font-family:sans-serif;line-height:1.5;color:#111">
+  <h2>Your UsbGames purchase history</h2>
+  <p>Tap the link below to view what you bought, redemption status, and download links for redeemed orders.</p>
+  <p><a href="${escapeHtml(historyUrl)}">View purchase history</a></p>
+  <p style="color:#666;font-size:0.9rem">This link expires in about ${expiresHours} hours. If you didn&rsquo;t request it, you can ignore this email.</p>
+  <p style="color:#666;font-size:0.85rem"><a href="${escapeHtml(siteUrl)}">${escapeHtml(siteUrl)}</a></p>
+</body></html>`;
+
+  const text = `UsbGames purchase history
+
+View your orders: ${historyUrl}
+
+This link expires in about ${expiresHours} hours.
+
+— UsbGames`;
+
+  return {
+    subject: "UsbGames — your purchase history link",
+    html,
+    text,
+  };
+}
+
+async function sendPurchaseHistoryLink({ to, historyUrl, siteUrl, expiresHours }) {
+  const messages = buildPurchaseHistoryMessages({
+    historyUrl,
+    siteUrl,
+    expiresHours: expiresHours || 2,
+  });
+
+  if (!isConfigured()) {
+    console.log("\n📧 EMAIL NOT CONFIGURED — purchase history link for", to);
+    console.log("   ", historyUrl, "\n");
+    return { sent: false, logged: true };
+  }
+
+  if (hasResend()) {
+    return sendViaResend(to, messages);
+  }
+  return sendViaSmtp(to, messages);
+}
+
+module.exports = {
+  isConfigured,
+  hasResend,
+  hasSmtp,
+  sendRedeemCode,
+  sendPurchaseHistoryLink,
+  sendTestEmail,
+};
+

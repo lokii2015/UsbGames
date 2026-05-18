@@ -73,8 +73,14 @@ function findByOrderId(orderId) {
   return hit;
 }
 
+function normalizeEmail(email) {
+  return String(email || "")
+    .trim()
+    .toLowerCase();
+}
+
 /** Only call after payment is confirmed — one code per order. */
-function createForOrder({ orderId, productIds, email, isGift }) {
+function createForOrder({ orderId, productIds, email, isGift, buyerEmail }) {
   const existing = findByOrderId(orderId);
   if (existing) return { code: existing[0], ...existing[1], existing: true };
 
@@ -87,15 +93,44 @@ function createForOrder({ orderId, productIds, email, isGift }) {
 
   const row = {
     productIds: [...productIds],
-    email: String(email).trim().toLowerCase(),
+    email: normalizeEmail(email),
     paypalOrderId: orderId,
     used: false,
     isGift: gift,
     createdAt: new Date().toISOString(),
   };
+  if (gift && buyerEmail) {
+    row.buyerEmail = normalizeEmail(buyerEmail);
+  }
   codes[code] = row;
   save(codes);
   return { code, ...row, existing: false };
+}
+
+/** Orders tied to this email (recipient or gift buyer). */
+function listByEmail(emailRaw) {
+  const email = normalizeEmail(emailRaw);
+  if (!email) return [];
+
+  const all = load();
+  const out = [];
+  for (const [code, row] of Object.entries(all)) {
+    const asRecipient = row.email === email;
+    const asBuyer = row.buyerEmail === email;
+    if (!asRecipient && !asBuyer) continue;
+    out.push({
+      code,
+      productIds: row.productIds || [],
+      purchasedAt: row.createdAt,
+      redeemed: Boolean(row.used),
+      redeemedAt: row.redeemedAt || null,
+      isGift: Boolean(row.isGift),
+      role: asBuyer && !asRecipient ? "buyer" : asRecipient && row.isGift ? "recipient" : "owner",
+      paypalOrderId: row.paypalOrderId || null,
+    });
+  }
+  out.sort((a, b) => new Date(b.purchasedAt) - new Date(a.purchasedAt));
+  return out;
 }
 
 function redeem(codeRaw, emailRaw) {
@@ -137,11 +172,13 @@ function redeem(codeRaw, emailRaw) {
 
 module.exports = {
   normalizeCode,
+  normalizeEmail,
   isGiftCode,
   isValidCodeFormat,
   createForOrder,
   findByOrderId,
   redeem,
   load,
+  listByEmail,
   isExpired,
 };

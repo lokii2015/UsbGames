@@ -13,6 +13,7 @@ const {
 } = require("./products");
 const paypal = require("./paypal");
 const { createFaqRouter } = require("./faq-routes");
+const { createPurchaseRouter } = require("./purchase-routes");
 const codes = require("./codes");
 const pending = require("./pending-orders");
 const bot = require("./paypal-bot");
@@ -83,6 +84,33 @@ app.post(
 app.use(express.json());
 
 app.use("/api/faq", createFaqRouter());
+
+function buildDownloadResponse(sessionId, cart) {
+  const downloads = cart.files.map((filename) => ({
+    name: filename.replace(/\.zip$/i, ""),
+    filename,
+    url: `/api/download/${encodeURIComponent(
+      filename
+    )}?session_id=${encodeURIComponent(
+      sessionId
+    )}&sig=${signDownload(sessionId, filename)}`,
+  }));
+
+  return {
+    product: { id: cart.productIds.join(","), name: cart.name },
+    products: cart.items.map((p) => ({ id: p.id, name: p.name })),
+    downloads,
+  };
+}
+
+app.use(
+  "/api/purchases",
+  createPurchaseRouter({
+    siteUrl: SITE_URL,
+    buildDownloadResponse,
+    sendAccessEmail: (opts) => mail.sendPurchaseHistoryLink(opts),
+  })
+);
 
 app.get("/api/health", (_req, res) => {
   res.json({
@@ -531,24 +559,6 @@ async function paypalOrderIsPaid(orderId) {
   return resolveCart(productIds);
 }
 
-function buildDownloadResponse(sessionId, cart) {
-  const downloads = cart.files.map((filename) => ({
-    name: filename.replace(/\.zip$/i, ""),
-    filename,
-    url: `/api/download/${encodeURIComponent(
-      filename
-    )}?session_id=${encodeURIComponent(
-      sessionId
-    )}&sig=${signDownload(sessionId, filename)}`,
-  }));
-
-  return {
-    product: { id: cart.productIds.join(","), name: cart.name },
-    products: cart.items.map((p) => ({ id: p.id, name: p.name })),
-    downloads,
-  };
-}
-
 app.get("/api/verify-session", async (req, res) => {
   const sessionId = req.query.session_id || req.query.token;
   if (!sessionId || typeof sessionId !== "string") {
@@ -700,4 +710,5 @@ app.listen(PORT, () => {
     console.warn("⚠ PAYPAL_WEBHOOK_ID not set — webhook bot disabled (capture still sends codes)");
   }
   console.log(`Redeem codes: ${SITE_URL}/redeem.html`);
+  console.log(`Purchase history: ${SITE_URL}/purchase-history.html`);
 });
