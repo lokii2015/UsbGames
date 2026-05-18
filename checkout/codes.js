@@ -20,7 +20,7 @@ const GIFT_CODE_TTL_DAYS =
   Number(process.env.GIFT_CODE_TTL_DAYS) > 0 ? Number(process.env.GIFT_CODE_TTL_DAYS) : 7;
 const GIFT_CODE_TTL_MS = GIFT_CODE_TTL_DAYS * 24 * 60 * 60 * 1000;
 const GIFT_CODE_RE = /^USB-G[A-Z0-9]{4}-[A-Z0-9]{4}$/;
-const STANDARD_CODE_RE = /^USB-[A-Z0-9]{4}-[A-Z0-9]{4}$/;
+const STANDARD_CODE_RE = /^USB-(?!G[A-Z0-9]{3}-)[A-Z0-9]{4}-[A-Z0-9]{4}$/;
 
 function ensureDir() {
   if (!fs.existsSync(DATA_DIR)) fs.mkdirSync(DATA_DIR, { recursive: true });
@@ -104,25 +104,28 @@ function findByOrderId(orderId) {
   return hit;
 }
 
-/** Only call after payment is confirmed — one code per order, valid 48 hours. */
-function createForOrder({ orderId, productIds, email }) {
+/** Only call after payment is confirmed — one code per order. */
+function createForOrder({ orderId, productIds, email, isGift }) {
   const existing = findByOrderId(orderId);
   if (existing) return { code: existing[0], ...existing[1], existing: true };
 
   const codes = load();
+  const gift = Boolean(isGift);
   let code;
   do {
-    code = generateCode();
+    code = gift ? generateGiftCode() : generateCode();
   } while (codes[code]);
 
   const createdAt = new Date();
-  const expiresAt = new Date(createdAt.getTime() + CODE_TTL_MS);
+  const ttl = gift ? GIFT_CODE_TTL_MS : CODE_TTL_MS;
+  const expiresAt = new Date(createdAt.getTime() + ttl);
 
   const row = {
     productIds: [...productIds],
     email: String(email).trim().toLowerCase(),
     paypalOrderId: orderId,
     used: false,
+    isGift: gift,
     createdAt: createdAt.toISOString(),
     expiresAt: expiresAt.toISOString(),
   };
@@ -140,14 +143,23 @@ function redeem(codeRaw, emailRaw) {
     return { ok: false, error: "Enter your email and redemption code." };
   }
 
+  if (!isValidCodeFormat(code)) {
+    return {
+      ok: false,
+      error:
+        "Invalid code format. Regular codes look like USB-XXXX-XXXX. Gift codes look like USB-GXXX-XXXX.",
+    };
+  }
+
   const codes = load();
   const row = codes[code];
   if (!row) return { ok: false, error: "Invalid code." };
   if (row.used) return { ok: false, error: "This code was already used." };
   if (isExpired(row)) {
+    const label = expiryLabelForRow(row);
     return {
       ok: false,
-      error: `This code expired (codes are valid for 48 hours after purchase). See refund.html and email ${SUPPORT_EMAIL} with your PayPal receipt.`,
+      error: `This code expired (valid for ${label} after purchase). See support and email ${SUPPORT_EMAIL} with your PayPal receipt.`,
       expired: true,
     };
   }
@@ -169,10 +181,15 @@ function redeem(codeRaw, emailRaw) {
 
 module.exports = {
   normalizeCode,
+  isGiftCode,
+  isValidCodeFormat,
   createForOrder,
   findByOrderId,
   redeem,
   load,
   isExpired,
+  expiryLabelForRow,
   CODE_TTL_MS,
+  GIFT_CODE_TTL_DAYS,
+  GIFT_CODE_TTL_MS,
 };

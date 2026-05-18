@@ -39,6 +39,7 @@ async function fulfillPaidOrder({
     orderId,
     productIds: cart.productIds,
     email: normalizedEmail,
+    isGift: Boolean(isGift),
   });
 
   const redeemUrl = `${siteUrl}/redeem.html`;

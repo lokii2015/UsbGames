@@ -26,9 +26,9 @@
     <main class="container checkout-page">
       <h1 class="title small">Redeem your code</h1>
       <p class="subtitle">
-        After you pay, we email a code like <span class="code-example" aria-hidden="true">USB-XXXX-XXXX</span> (example shape only).
-        Codes expire <strong>48 hours</strong> after purchase.
-        Use the same Gmail you used at checkout.
+        Regular codes look like <span class="code-example">USB-XXXX-XXXX</span> (expire in <strong>48 hours</strong>).
+        Gift codes look like <span class="code-example">USB-GXXX-XXXX</span> (expire in <strong>7 days</strong>).
+        Use the same email the code was sent to.
       </p>
 
       <form class="card redeem-form" id="redeem-form">
@@ -52,7 +52,7 @@
             required
             autocomplete="off"
             spellcheck="false"
-            placeholder="USB-XXXX-XXXX"
+            placeholder="USB-XXXX-XXXX or USB-GXXX-XXXX"
             pattern="USB-[A-Za-z0-9]{4}-[A-Za-z0-9]{4}"
           />
         </label>
