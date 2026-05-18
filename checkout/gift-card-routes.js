@@ -28,6 +28,25 @@ function createGiftCardRouter({ parseCartBody }) {
     });
   });
 
+  router.post("/admin/link", (req, res) => {
+    const adminCode = getAdminCode();
+    if (!adminCode || String(req.body?.adminCode || "").trim() !== adminCode) {
+      return res.status(403).json({ error: "Invalid admin code." });
+    }
+    const cards = req.body?.cards;
+    if (!Array.isArray(cards) || !cards.length) {
+      return res.status(400).json({ error: "Send cards: [{ code, amountDollars }, ...]" });
+    }
+    const result = giftCards.importCards(cards);
+    if (!result.ok) return res.status(400).json({ error: result.error });
+    res.json({
+      ok: true,
+      linked: result.linked,
+      errors: result.errors,
+      count: result.linked.length,
+    });
+  });
+
   router.post("/admin/create", (req, res) => {
     const adminCode = getAdminCode();
     if (!adminCode || String(req.body?.adminCode || "").trim() !== adminCode) {

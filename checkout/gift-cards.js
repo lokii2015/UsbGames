@@ -108,6 +108,69 @@ function quoteForCart(codeRaw, cartAmountCents) {
   };
 }
 
+/** Generate codes only (not saved) — for printing physical cards first. */
+function generateCodesOnly(count) {
+  const n = Math.min(500, Math.max(1, Math.round(Number(count) || 1)));
+  const existing = load();
+  const codes = [];
+  for (let i = 0; i < n; i++) {
+    let code;
+    do {
+      code = generateCode();
+    } while (existing[code] || codes.includes(code));
+    codes.push(code);
+  }
+  return codes;
+}
+
+/**
+ * Link existing codes to CAD balances (your printed cards).
+ * entries: { code, amountDollars or amountCents, note?, overwrite? }
+ */
+function importCards(entries) {
+  if (!Array.isArray(entries) || !entries.length) {
+    return { ok: false, error: "No cards to import." };
+  }
+  const data = load();
+  const linked = [];
+  const errors = [];
+  const now = new Date().toISOString();
+
+  for (const raw of entries) {
+    const code = normalizeCode(raw.code);
+    if (!isValidFormat(code)) {
+      errors.push({ code: raw.code, error: "Invalid format (USB-Cxxx-xxxx-xxxx-x)" });
+      continue;
+    }
+    let cents;
+    if (raw.amountCents != null) {
+      cents = Math.round(Number(raw.amountCents));
+    } else {
+      cents = Math.round(Number(raw.amountDollars) * 100);
+    }
+    if (!Number.isFinite(cents) || cents < 1) {
+      errors.push({ code, error: "Invalid amount" });
+      continue;
+    }
+    if (data[code] && !raw.overwrite) {
+      errors.push({ code, error: "Already linked — use overwrite to replace balance" });
+      continue;
+    }
+    const prev = data[code];
+    data[code] = {
+      balanceCents: cents,
+      initialCents: cents,
+      currency: "cad",
+      createdAt: prev?.createdAt || now,
+      note: String(raw.note || "").slice(0, 200) || null,
+      uses: Array.isArray(prev?.uses) ? prev.uses : [],
+    };
+    linked.push({ code, amountLabel: formatMoney(cents) });
+  }
+  save(data);
+  return { ok: true, linked, errors };
+}
+
 function createCards({ amountCents, count, note }) {
   const cents = Math.round(Number(amountCents));
   if (!Number.isFinite(cents) || cents < 1) {
@@ -183,7 +246,10 @@ module.exports = {
   generateCode,
   getBalance,
   quoteForCart,
+  generateCodesOnly,
+  importCards,
   createCards,
   deduct,
   formatMoney,
+  load,
 };

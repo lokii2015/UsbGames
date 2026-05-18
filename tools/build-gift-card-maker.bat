@@ -10,6 +10,8 @@ if errorlevel 1 (
 )
 echo.
 echo Built: tools\dist\GiftCardMaker.exe
-echo Run: tools\dist\GiftCardMaker.exe 25 5
-echo   (25 dollars CAD, 5 cards)
+echo Run: tools\dist\GiftCardMaker.exe gen 15
+echo      tools\dist\GiftCardMaker.exe link tools\codes-to-print.txt 25
+echo      tools\dist\GiftCardMaker.exe push https://usbgames.onrender.com 5394
+echo See tools\GIFT-CARDS-README.txt
 pause
