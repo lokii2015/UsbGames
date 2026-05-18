@@ -3,7 +3,7 @@
  */
 const nodemailer = require("nodemailer");
 const { Resend } = require("resend");
-const { SUPPORT_EMAIL, supportMessageText } = require("./support");
+const { SUPPORT_EMAIL, redeemSupportHtml, redeemSupportText } = require("./support");
 
 let resendClient = null;
 
@@ -74,7 +74,8 @@ function buildMessages({ code, productNames, redeemUrl, siteUrl }) {
   <p><a href="${escapeHtml(redeemUrl)}">Redeem your code</a> — use the same Gmail you entered at checkout.</p>
   <p style="color:#c00;font-size:0.9rem"><strong>This code expires in 48 hours.</strong> Redeem soon to download your games.</p>
   <p style="color:#666;font-size:0.9rem">Unzip downloads into <code>UsbGames\\PortableGames\\</code> on your USB.</p>
-  <p style="color:#666;font-size:0.85rem">Didn&rsquo;t get this email within 48 hours? See <a href="${escapeHtml(siteUrl)}/refund.html">Refund Policy</a> and contact <a href="mailto:${escapeHtml(SUPPORT_EMAIL)}">${escapeHtml(SUPPORT_EMAIL)}</a>.</p>
+  ${redeemSupportHtml(siteUrl)}
+  <p style="color:#666;font-size:0.85rem;margin-top:1rem">Didn&rsquo;t get this email within 48 hours of paying? Email <a href="mailto:${escapeHtml(SUPPORT_EMAIL)}">${escapeHtml(SUPPORT_EMAIL)}</a> with your PayPal receipt.</p>
   <p style="color:#666;font-size:0.85rem"><a href="${escapeHtml(siteUrl)}">${escapeHtml(siteUrl)}</a></p>
 </body></html>`;
 
@@ -87,7 +88,7 @@ Use the same Gmail you used at checkout.
 
 This code expires in 48 hours.
 
-${supportMessageText(siteUrl)}
+${redeemSupportText(siteUrl)}
 
 — UsbGames`;
 
