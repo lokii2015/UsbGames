@@ -8,6 +8,14 @@ const fs = require("fs");
 const path = require("path");
 
 const { SUPPORT_EMAIL } = require("./support");
+const {
+  normalizeEmail,
+  emailsEquivalent,
+  collectEmails,
+  rowLookupEmails,
+  emailMatchesAny,
+} = require("./email-match");
+const pending = require("./pending-orders");
 
 const DATA_DIR = path.join(__dirname, "data");
 const CODES_FILE = path.join(DATA_DIR, "codes.json");
@@ -73,14 +81,8 @@ function findByOrderId(orderId) {
   return hit;
 }
 
-function normalizeEmail(email) {
-  return String(email || "")
-    .trim()
-    .toLowerCase();
-}
-
 /** Only call after payment is confirmed — one code per order. */
-function createForOrder({ orderId, productIds, email, isGift, buyerEmail }) {
+function createForOrder({ orderId, productIds, email, isGift, buyerEmail, lookupEmails }) {
   const existing = findByOrderId(orderId);
   if (existing) return { code: existing[0], ...existing[1], existing: true };
 
@@ -102,12 +104,19 @@ function createForOrder({ orderId, productIds, email, isGift, buyerEmail }) {
   if (gift && buyerEmail) {
     row.buyerEmail = normalizeEmail(buyerEmail);
   }
+  row.lookupEmails = collectEmails(row.email, row.buyerEmail, lookupEmails);
   codes[code] = row;
   save(codes);
   return { code, ...row, existing: false };
 }
 
-/** Orders tied to this email (recipient or gift buyer). */
+function rowMatchesEmail(row, searchEmail) {
+  const pend = row.paypalOrderId ? pending.get(row.paypalOrderId) : null;
+  const emails = rowLookupEmails(row, pend);
+  return emailMatchesAny(searchEmail, emails);
+}
+
+/** Orders tied to this email (checkout, PayPal, gift buyer, Gmail aliases). */
 function listByEmail(emailRaw) {
   const email = normalizeEmail(emailRaw);
   if (!email) return [];
@@ -115,9 +124,9 @@ function listByEmail(emailRaw) {
   const all = load();
   const out = [];
   for (const [code, row] of Object.entries(all)) {
-    const asRecipient = row.email === email;
-    const asBuyer = row.buyerEmail === email;
-    if (!asRecipient && !asBuyer) continue;
+    if (!rowMatchesEmail(row, email)) continue;
+    const asRecipient = emailsEquivalent(row.email, email);
+    const asBuyer = row.buyerEmail && emailsEquivalent(row.buyerEmail, email);
     out.push({
       code,
       productIds: row.productIds || [],
@@ -125,12 +134,27 @@ function listByEmail(emailRaw) {
       redeemed: Boolean(row.used),
       redeemedAt: row.redeemedAt || null,
       isGift: Boolean(row.isGift),
-      role: asBuyer && !asRecipient ? "buyer" : asRecipient && row.isGift ? "recipient" : "owner",
+      role:
+        asBuyer && !asRecipient
+          ? "buyer"
+          : asRecipient && row.isGift
+            ? "recipient"
+            : "owner",
       paypalOrderId: row.paypalOrderId || null,
     });
   }
   out.sort((a, b) => new Date(b.purchasedAt) - new Date(a.purchasedAt));
   return out;
+}
+
+function findOwnedCode(emailRaw, codeRaw) {
+  const email = normalizeEmail(emailRaw);
+  const code = normalizeCode(codeRaw);
+  if (!email || !code) return null;
+  const row = load()[code];
+  if (!row) return null;
+  if (!rowMatchesEmail(row, email)) return null;
+  return { code, row };
 }
 
 function redeem(codeRaw, emailRaw) {
@@ -154,7 +178,7 @@ function redeem(codeRaw, emailRaw) {
   const row = codes[code];
   if (!row) return { ok: false, error: "Invalid code." };
   if (row.used) return { ok: false, error: "This code was already used." };
-  if (row.email !== email) {
+  if (!rowMatchesEmail(row, email)) {
     return {
       ok: false,
       error:
@@ -180,5 +204,7 @@ module.exports = {
   redeem,
   load,
   listByEmail,
+  findOwnedCode,
+  rowMatchesEmail,
   isExpired,
 };

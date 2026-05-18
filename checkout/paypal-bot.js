@@ -28,6 +28,7 @@ async function fulfillPaidOrder({
   isGift,
   buyerEmail,
   giftMessage,
+  lookupEmails,
 }) {
   const cart = resolveCart(productIds);
   if (!cart) throw new Error("Invalid products in order");
@@ -41,6 +42,7 @@ async function fulfillPaidOrder({
     email: normalizedEmail,
     isGift: Boolean(isGift),
     buyerEmail: isGift ? buyerEmail : null,
+    lookupEmails,
   });
 
   const redeemUrl = `${siteUrl}/redeem.html`;
@@ -78,7 +80,9 @@ async function fulfillFromPayPalOrderId(orderId, siteUrl) {
   if (!productIds.length) throw new Error("No products on order");
 
   const pend = pending.get(orderId);
-  const email = pend?.email || paypal.payerEmail(order);
+  const checkoutEmail = pend?.email || null;
+  const paypalEmail = paypal.payerEmail(order);
+  const email = checkoutEmail || paypalEmail;
   if (!email) throw new Error("No email for order — customer must enter Gmail at checkout");
 
   return fulfillPaidOrder({
@@ -89,6 +93,7 @@ async function fulfillFromPayPalOrderId(orderId, siteUrl) {
     isGift: Boolean(pend?.isGift),
     buyerEmail: pend?.buyerEmail,
     giftMessage: pend?.giftMessage || "",
+    lookupEmails: [checkoutEmail, paypalEmail, pend?.buyerEmail],
   });
 }
 

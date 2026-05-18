@@ -5,21 +5,17 @@ const crypto = require("crypto");
 const fs = require("fs");
 const path = require("path");
 const codes = require("./codes");
+const { normalizeEmail, emailMatchesAny } = require("./email-match");
 
 const DATA_DIR = path.join(__dirname, "data");
 const SESSIONS_FILE = path.join(DATA_DIR, "purchase-history-sessions.json");
+const PURCHASES_FILE = path.join(DATA_DIR, "purchases.json");
 const TOKEN_HOURS = 2;
 const REQUEST_COOLDOWN_MS = 60 * 1000;
 const MAX_REQUESTS_PER_HOUR = 5;
 
 function ensureDir() {
   if (!fs.existsSync(DATA_DIR)) fs.mkdirSync(DATA_DIR, { recursive: true });
-}
-
-function normalizeEmail(email) {
-  return String(email || "")
-    .trim()
-    .toLowerCase();
 }
 
 function isValidEmail(email) {
@@ -49,6 +45,16 @@ function saveStore(data) {
   fs.writeFileSync(SESSIONS_FILE, JSON.stringify(data, null, 2));
 }
 
+function loadPurchases() {
+  ensureDir();
+  if (!fs.existsSync(PURCHASES_FILE)) return {};
+  try {
+    return JSON.parse(fs.readFileSync(PURCHASES_FILE, "utf8"));
+  } catch {
+    return {};
+  }
+}
+
 function pruneSessions(sessions) {
   const now = Date.now();
   for (const key of Object.keys(sessions)) {
@@ -76,8 +82,58 @@ function maskCode(code) {
   return "USB-****-****";
 }
 
+function orderKey(row) {
+  return row.paypalOrderId || row.code || "";
+}
+
+function listFromPurchases(email, existingKeys) {
+  const purchases = loadPurchases();
+  const allCodes = codes.load();
+  const out = [];
+
+  for (const [sessionId, row] of Object.entries(purchases)) {
+    if (!row || !emailMatchesAny(email, row.email)) continue;
+
+    const codeRow = allCodes[sessionId];
+    if (codeRow) continue;
+
+    const linkedOrderId = row.paypalOrderId || sessionId;
+    const byOrder = codes.findByOrderId(linkedOrderId);
+    if (byOrder) continue;
+
+    const key = row.paypalOrderId || sessionId;
+    if (existingKeys.has(key)) continue;
+
+    const productIds = row.productIds || (row.productId ? [row.productId] : []);
+    out.push({
+      code: codes.isValidCodeFormat(sessionId) ? sessionId : null,
+      productIds,
+      purchasedAt: row.at || row.createdAt || null,
+      redeemed: codeRow ? Boolean(codeRow.used) : false,
+      redeemedAt: codeRow?.redeemedAt || null,
+      isGift: false,
+      role: "owner",
+      paypalOrderId: row.paypalOrderId || (sessionId.startsWith("PAY") ? sessionId : null),
+    });
+    existingKeys.add(key);
+  }
+
+  return out;
+}
+
 function listOrdersForEmail(email) {
-  return codes.listByEmail(email);
+  const fromCodes = codes.listByEmail(email);
+  const seen = new Set(fromCodes.map(orderKey).filter(Boolean));
+  const fromPurchases = listFromPurchases(email, seen);
+  const merged = [...fromCodes, ...fromPurchases];
+
+  merged.sort((a, b) => {
+    const ta = a.purchasedAt ? new Date(a.purchasedAt).getTime() : 0;
+    const tb = b.purchasedAt ? new Date(b.purchasedAt).getTime() : 0;
+    return tb - ta;
+  });
+
+  return merged;
 }
 
 function createAccessToken(email) {
@@ -127,15 +183,26 @@ function canRequestAccess(email) {
   return { ok: true };
 }
 
-function requestAccess(email) {
+function requestAccess(email, codeRaw) {
   if (!isValidEmail(email)) {
     return { ok: false, error: "Enter a valid email address." };
   }
+
+  const owned = codeRaw ? codes.findOwnedCode(email, codeRaw) : null;
+  if (codeRaw && !owned) {
+    return {
+      ok: false,
+      error:
+        "That code does not match this email. Use the email your code was sent to, or try your PayPal email.",
+    };
+  }
+
   const gate = canRequestAccess(email);
   if (!gate.ok) return gate;
 
-  const { token, expiresAt } = createAccessToken(email);
-  return { ok: true, token, expiresAt, email: normalizeEmail(email) };
+  const sessionEmail = owned ? normalizeEmail(owned.row.email) : normalizeEmail(email);
+  const { token, expiresAt } = createAccessToken(sessionEmail);
+  return { ok: true, token, expiresAt, email: sessionEmail, verifiedWithCode: Boolean(owned) };
 }
 
 module.exports = {

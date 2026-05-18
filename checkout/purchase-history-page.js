@@ -5,6 +5,7 @@
   const requestSection = document.getElementById("history-request");
   const requestForm = document.getElementById("history-request-form");
   const emailInput = document.getElementById("history-email");
+  const codeInput = document.getElementById("history-code");
   const requestMsg = document.getElementById("history-request-msg");
   const requestErr = document.getElementById("history-request-error");
   const loadingEl = document.getElementById("history-loading");
@@ -13,6 +14,7 @@
   const emptyEl = document.getElementById("history-empty");
 
   if (params.get("email")) emailInput.value = params.get("email");
+  if (params.get("code") && codeInput) codeInput.value = params.get("code");
 
   function apiUrl(path) {
     const base = typeof window.USBGAMES_API === "string" ? window.USBGAMES_API : "";
@@ -158,13 +160,24 @@
     requestErr.hidden = true;
 
     try {
+      const payload = { email: emailInput.value.trim() };
+      if (codeInput && codeInput.value.trim()) payload.code = codeInput.value.trim();
+
       const res = await fetch(apiUrl("/api/purchases/request-access"), {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email: emailInput.value.trim() }),
+        body: JSON.stringify(payload),
       });
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || "Request failed");
+
+      if (data.token) {
+        location.replace(
+          "purchase-history.html?token=" + encodeURIComponent(data.token)
+        );
+        return;
+      }
+
       requestMsg.hidden = false;
       requestMsg.textContent = data.message || "Check your email for the link.";
     } catch (err) {

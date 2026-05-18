@@ -1289,6 +1289,16 @@ button.button:disabled {
   margin: 0 0 1rem;
 }
 
+.purchase-hint--small {
+  font-size: 0.85rem;
+  margin: 0.75rem 0 0;
+}
+
+.checkout-optional {
+  font-weight: normal;
+  color: #777;
+}
+
 .purchase-signed-in {
   color: #aaa;
   font-size: 0.9rem;

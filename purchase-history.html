@@ -33,7 +33,7 @@
       <section class="card" id="history-request">
         <h2 class="purchase-section-title">Sign in with email</h2>
         <p class="purchase-hint">
-          Use the same email from checkout (or the recipient email for gifts). We&rsquo;ll email you a secure link — no password.
+          Use the same email from checkout (or the recipient email for gifts). If checkout and PayPal use different emails, enter your code too.
         </p>
         <form class="redeem-form" id="history-request-form">
           <label class="checkout-field">
@@ -47,7 +47,21 @@
               placeholder="you@gmail.com"
             />
           </label>
-          <button type="submit" class="button" id="btn-history-request">Email me my history</button>
+          <label class="checkout-field">
+            <span class="checkout-field-label">Redemption code <span class="checkout-optional">(optional)</span></span>
+            <input
+              type="text"
+              id="history-code"
+              name="code"
+              autocomplete="off"
+              spellcheck="false"
+              placeholder="USB-XXXX-XXXX — finds your order instantly"
+            />
+          </label>
+          <button type="submit" class="button" id="btn-history-request">View my orders</button>
+          <p class="purchase-hint purchase-hint--small">
+            With a code we open your history right away. Otherwise we email you a sign-in link.
+          </p>
           <p id="history-request-msg" class="faq-success" hidden></p>
           <p id="history-request-error" class="checkout-error" hidden></p>
         </form>
@@ -58,7 +72,7 @@
 
       <div id="history-list" class="purchase-history-list" hidden></div>
       <p id="history-empty" class="games-install-hint" hidden>
-        No orders found for this email yet. After PayPal checkout you&rsquo;ll get a code by email — it will show up here too.
+        No orders found for this email. Try the exact address from your code email, your PayPal email, or sign in again with your redemption code above.
       </p>
 
       <p class="games-install-hint">

@@ -8,12 +8,24 @@ function createPurchaseRouter({ siteUrl, buildDownloadResponse, sendAccessEmail 
   router.post("/request-access", async (req, res) => {
     try {
       const email = req.body?.email;
-      const result = history.requestAccess(email);
+      const code = req.body?.code;
+      const result = history.requestAccess(email, code);
       if (!result.ok) return res.status(400).json({ error: result.error });
 
       const historyUrl = `${siteUrl}/purchase-history.html?token=${encodeURIComponent(
         result.token
       )}`;
+
+      if (result.verifiedWithCode) {
+        return res.json({
+          ok: true,
+          token: result.token,
+          historyUrl,
+          message: "Code verified — opening your orders…",
+          emailSent: false,
+          expiresAt: result.expiresAt,
+        });
+      }
 
       const mailResult = await sendAccessEmail({
         to: result.email,
@@ -24,6 +36,7 @@ function createPurchaseRouter({ siteUrl, buildDownloadResponse, sendAccessEmail 
 
       res.json({
         ok: true,
+        ...(mailResult.sent ? {} : { token: result.token, historyUrl }),
         message: mailResult.sent
           ? `We sent a sign-in link to ${result.email}. Check your inbox (and spam).`
           : `Email is not configured on the server — open this link now: ${historyUrl}`,
@@ -59,7 +72,7 @@ function createPurchaseRouter({ siteUrl, buildDownloadResponse, sendAccessEmail 
       }
 
       return {
-        codeMasked: history.maskCode(row.code),
+        codeMasked: row.code ? history.maskCode(row.code) : "—",
         products,
         purchasedAt: row.purchasedAt,
         redeemed: row.redeemed,
