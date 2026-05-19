@@ -144,6 +144,7 @@ async function cmdPush() {
   const cards = Object.entries(data).map(([code, row]) => ({
     code,
     amountDollars: (row.balanceCents || row.initialCents) / 100,
+    overwrite: true,
   }));
 
   if (!cards.length) {
