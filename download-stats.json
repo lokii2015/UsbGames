@@ -1,0 +1,69 @@
+{
+  "trackingStarted": "2026-05-20T00:00:00.000Z",
+  "items": [
+    {
+      "id": "BrickBreaker.zip",
+      "label": "Brick Breaker",
+      "baseline": 0,
+      "tracked": 0,
+      "total": 0,
+      "trackingStarted": "2026-05-20T00:00:00.000Z"
+    },
+    {
+      "id": "MemoryMatch.zip",
+      "label": "Memory Match",
+      "baseline": 0,
+      "tracked": 0,
+      "total": 0,
+      "trackingStarted": "2026-05-20T00:00:00.000Z"
+    },
+    {
+      "id": "PixelFlap.zip",
+      "label": "Pixel Flap",
+      "baseline": 0,
+      "tracked": 0,
+      "total": 0,
+      "trackingStarted": "2026-05-20T00:00:00.000Z"
+    },
+    {
+      "id": "Pong.zip",
+      "label": "Pong",
+      "baseline": 0,
+      "tracked": 0,
+      "total": 0,
+      "trackingStarted": "2026-05-20T00:00:00.000Z"
+    },
+    {
+      "id": "Snake.zip",
+      "label": "Snake",
+      "baseline": 0,
+      "tracked": 2,
+      "total": 2,
+      "trackingStarted": "2026-05-20T00:00:00.000Z"
+    },
+    {
+      "id": "SpaceCommand.zip",
+      "label": "Space Command",
+      "baseline": 0,
+      "tracked": 0,
+      "total": 0,
+      "trackingStarted": "2026-05-20T00:00:00.000Z"
+    },
+    {
+      "id": "TicTacToe.zip",
+      "label": "Tic-Tac-Toe",
+      "baseline": 0,
+      "tracked": 0,
+      "total": 0,
+      "trackingStarted": "2026-05-20T00:00:00.000Z"
+    },
+    {
+      "id": "UsbGames-Launcher.zip",
+      "label": "UsbGames Launcher",
+      "baseline": 0,
+      "tracked": 0,
+      "total": 0,
+      "trackingStarted": "2026-05-20T00:00:00.000Z"
+    }
+  ]
+}

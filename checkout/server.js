@@ -23,6 +23,7 @@ const { SUPPORT_EMAIL } = require("./support");
 const { getSiteUrl, publicSiteUrl, CANONICAL_SITE_URL } = require("./site-url");
 const giftCards = require("./gift-cards");
 const { createGiftCardRouter } = require("./gift-card-routes");
+const downloadStats = require("./download-stats");
 
 const PORT = Number(process.env.PORT) || 4242;
 const SITE_URL = getSiteUrl(PORT);
@@ -764,6 +765,22 @@ const PREMIUM_ZIPS = new Set([
   "UsbGames-RetroArcadePack.zip",
 ]);
 
+app.get("/api/download-stats", (req, res) => {
+  res.json(downloadStats.getPublic());
+});
+
+app.post("/api/download-stats/baseline", (req, res) => {
+  const code = process.env.FAQ_ADMIN_CODE?.trim();
+  const sent = String(req.headers["x-faq-admin"] || req.body?.adminCode || "").trim();
+  if (!code || sent !== code) {
+    return res.status(403).json({ error: "Admin code required" });
+  }
+  const id = req.body?.id;
+  const baseline = req.body?.baseline;
+  if (!id) return res.status(400).json({ error: "id required" });
+  res.json(downloadStats.setBaseline(id, baseline));
+});
+
 app.get("/downloads/:file", (req, res, next) => {
   if (PREMIUM_ZIPS.has(req.params.file)) {
     return res.status(403).type("html").send(`<!DOCTYPE html>
@@ -774,12 +791,31 @@ app.get("/downloads/:file", (req, res, next) => {
 <p>This game is sold in the <a href="/store.html">Store</a>. <a href="/checkout.html">Checkout</a> with PayPal or card.</p>
 </main></body></html>`);
   }
+  try {
+    downloadStats.record(req.params.file);
+  } catch (err) {
+    console.warn("download-stats:", err.message);
+  }
+  next();
+});
+
+app.get("/UsbGames-Launcher.zip", (req, res, next) => {
+  try {
+    downloadStats.record("UsbGames-Launcher.zip");
+  } catch (err) {
+    console.warn("download-stats:", err.message);
+  }
   next();
 });
 
 app.use(express.static(WEB_ROOT));
 
 app.listen(PORT, () => {
+  try {
+    downloadStats.publishPublic();
+  } catch (err) {
+    console.warn("download-stats publish:", err.message);
+  }
   console.log(`UsbGames checkout: ${SITE_URL}`);
   if (
     process.env.SITE_URL &&

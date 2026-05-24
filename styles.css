@@ -1376,3 +1376,47 @@ button.button:disabled {
   font-size: 0.85rem;
   color: #888;
 }
+
+.download-btn-wrap {
+  display: flex;
+  flex-direction: row;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+  gap: 0.65rem 0.85rem;
+  margin-top: 0.65rem;
+}
+
+.download-stats {
+  display: inline-flex;
+  flex-direction: column;
+  align-items: flex-start;
+  margin: 0;
+  padding: 0.35rem 0.55rem;
+  font-size: 0.72rem;
+  line-height: 1.25;
+  color: #9ab0a8;
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 8px;
+  text-align: left;
+}
+
+.download-stats-total {
+  font-weight: 700;
+  font-size: 0.85rem;
+  color: #7ee8c8;
+}
+
+.download-stats-total::after {
+  content: " downloads";
+  font-weight: 500;
+  font-size: 0.72rem;
+  color: #9ab0a8;
+}
+
+.download-stats-detail {
+  font-size: 0.65rem;
+  color: #7a8f86;
+  margin-top: 0.1rem;
+}
